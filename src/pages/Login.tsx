@@ -9,56 +9,39 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTours } from "@/contexts/TourContext";
 import { t } from "@/lib/i18n";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const { language } = useTours();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
     try {
-      // TODO: Integrate real auth API
-      await new Promise((r) => setTimeout(r, 600));
-      login({
-        id: "demo-user",
-        name:
-          email.split("@")[0] || (language === "VI" ? "Người dùng" : "User"),
-        email,
-        avatarUrl:
-          "https://api.dicebear.com/7.x/initials/svg?seed=" +
-          encodeURIComponent(email || "U"),
-      });
+      await signIn(email, password);
+      toast.success("Đăng nhập thành công! 🎉");
       navigate("/");
-    } catch (err) {
-      setError(t(language, "auth_login_error"));
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || "Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.");
     } finally {
       setLoading(false);
     }
   };
 
   const onGoogleLogin = async () => {
-    setError(null);
     setLoading(true);
     try {
-      // TODO: Integrate Google OAuth
-      await new Promise((r) => setTimeout(r, 600));
-      login({
-        id: "google-user",
-        name: "Google User",
-        email: "google.user@example.com",
-        avatarUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=Google",
-      });
-      navigate("/");
-    } catch (err) {
-      setError(t(language, "auth_google_login_error"));
-    } finally {
+      await signInWithGoogle();
+      // Redirect sẽ được xử lý tự động bởi Supabase
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      toast.error(error.message || "Đăng nhập Google thất bại");
       setLoading(false);
     }
   };
@@ -100,7 +83,6 @@ const Login = () => {
                     placeholder="••••••••"
                   />
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading
                     ? t(language, "auth_processing")

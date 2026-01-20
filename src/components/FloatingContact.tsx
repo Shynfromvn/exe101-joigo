@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle, X, Bot } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ChatBot } from "@/components/ChatBot";
 
 const FloatingContact = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // HƯỚNG DẪN: Thay đổi các thông tin sau theo thông tin thực tế của bạn
   // 1. Zalo: Nhập số điện thoại Zalo (VD: "0987654321")
@@ -20,11 +23,29 @@ const FloatingContact = () => {
     window.open(`https://m.me/${facebookPageId}`, "_blank");
   };
 
+  const handleAIChatClick = () => {
+    // Mở AI Chat dialog
+    setIsChatOpen(true);
+    setIsExpanded(false);
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {/* Expanded buttons */}
       {isExpanded && (
         <div className="flex flex-col gap-3 animate-fade-in">
+          {/* AI Chat Button */}
+          <button
+            onClick={handleAIChatClick}
+            className="group relative flex items-center gap-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 pr-4"
+            aria-label="Chat với AI"
+          >
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
+              <Bot className="w-8 h-8 text-white" />
+            </div>
+            <span className="font-medium text-gray-700 pr-2">Chat với AI</span>
+          </button>
+
           {/* Zalo Button */}
           <button
             onClick={handleZaloClick}
@@ -122,6 +143,13 @@ const FloatingContact = () => {
           <MessageCircle className="w-8 h-8 text-white" />
         )}
       </button>
+
+      {/* AI Chat Dialog */}
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] p-0 gap-0 overflow-hidden">
+          <ChatBot />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

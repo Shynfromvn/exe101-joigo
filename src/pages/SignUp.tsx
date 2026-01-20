@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTours } from "@/contexts/TourContext";
 import { t } from "@/lib/i18n";
+import { toast } from "sonner";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -16,50 +17,34 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const { language } = useTours();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
     try {
-      // TODO: Integrate real signup API
-      await new Promise((r) => setTimeout(r, 700));
-      // After successful signup, login the user
-      login({
-        id: `user-${Date.now()}`,
-        name: name || email.split("@")[0] || "User",
-        email,
-        avatarUrl:
-          "https://api.dicebear.com/7.x/initials/svg?seed=" +
-          encodeURIComponent(name || email || "U"),
+      await signUp(email, password, name);
+      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản. 📧", {
+        duration: 6000,
       });
-      navigate("/");
-    } catch (err) {
-      setError(t(language, "auth_signup_error"));
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      toast.error(error.message || "Đăng ký thất bại. Email có thể đã được sử dụng.");
     } finally {
       setLoading(false);
     }
   };
 
   const onGoogleSignUp = async () => {
-    setError(null);
     setLoading(true);
     try {
-      // TODO: Integrate Google OAuth
-      await new Promise((r) => setTimeout(r, 600));
-      login({
-        id: "google-user-signup",
-        name: "Google User",
-        email: "google.user@example.com",
-        avatarUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=Google",
-      });
-      navigate("/");
-    } catch (err) {
-      setError(t(language, "auth_google_signup_error"));
-    } finally {
+      await signInWithGoogle();
+      // Redirect sẽ được xử lý tự động
+    } catch (error: any) {
+      console.error("Google signup error:", error);
+      toast.error(error.message || "Đăng ký Google thất bại");
       setLoading(false);
     }
   };
@@ -111,10 +96,13 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    minLength={6}
                     placeholder="••••••••"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Mật khẩu tối thiểu 6 ký tự
+                  </p>
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading
                     ? t(language, "auth_processing")

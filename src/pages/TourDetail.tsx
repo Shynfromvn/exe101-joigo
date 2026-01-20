@@ -8,11 +8,13 @@ import {
   Users,
   ArrowRight,
   ChevronRight,
+  Heart,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import { useTours } from "@/contexts/TourContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -27,11 +29,25 @@ const TourDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { tours, currency, language } = useTours();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isAllPhotosOpen, setIsAllPhotosOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   const tour = tours.find((t) => t.id === id);
+  
+  // Check if tour is in wishlist
+  const inWishlist = tour ? isInWishlist(tour.id) : false;
+
+  const handleWishlistToggle = () => {
+    if (tour) {
+      if (inWishlist) {
+        removeFromWishlist(tour.id);
+      } else {
+        addToWishlist(tour);
+      }
+    }
+  };
 
   // Get images array, fallback to single image if images array doesn't exist
   const tourImages = tour?.images || (tour?.image ? [tour.image] : []);
@@ -295,8 +311,19 @@ const TourDetail = () => {
                 {t(language, "td_book_now")}
               </Button>
 
-              <Button variant="outline" className="w-full" size="lg">
-                {t(language, "td_add_wishlist")}
+              <Button 
+                variant={inWishlist ? "default" : "outline"} 
+                className="w-full" 
+                size="lg"
+                onClick={handleWishlistToggle}
+              >
+                <Heart 
+                  className={`w-5 h-5 mr-2 ${inWishlist ? "fill-current" : ""}`}
+                />
+                {inWishlist 
+                  ? (language === "VI" ? "Đã yêu thích" : "In Wishlist")
+                  : t(language, "td_add_wishlist")
+                }
               </Button>
 
               <div className="mt-6 pt-6 border-t border-border">
