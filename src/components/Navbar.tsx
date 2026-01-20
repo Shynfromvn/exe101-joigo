@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, Heart, User, LogOut, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTours } from "@/contexts/TourContext";
 import { t } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -15,7 +23,7 @@ const Navbar = () => {
   const { currency, setCurrency, setSearchQuery, language, setLanguage } =
     useTours();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, signOut, loading } = useAuth();
 
   const popularSearches = [
     "Van Mieu - Quoc Tu Giam",
@@ -98,6 +106,13 @@ const Navbar = () => {
                 {item.label}
               </button>
             ))}
+            <Link
+              to="/chat"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-lg transition-all shadow-md hover:shadow-lg"
+            >
+              <Bot className="w-4 h-4" />
+              {language === "VI" ? "AI Trợ Lý" : "AI Assistant"}
+            </Link>
           </div>
 
           {/* Right Side Actions */}
@@ -113,26 +128,56 @@ const Navbar = () => {
 
             {/* Auth Area - Desktop */}
             <div className="hidden md:flex items-center gap-3">
-              {user ? (
-                <>
-                  <button
-                    onClick={() => navigate("/profile")}
-                    className="flex items-center gap-2 group"
-                  >
-                    <Avatar className="w-8 h-8 ring-1 ring-border">
-                      <AvatarImage src={user.avatarUrl} alt={user.name} />
-                      <AvatarFallback>
-                        {user.name?.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium group-hover:text-primary transition-colors">
-                      {user.name}
-                    </span>
-                  </button>
-                  <Button variant="outline" size="sm" onClick={logout}>
-                    Log out
-                  </Button>
-                </>
+              {loading ? (
+                <div className="w-8 h-8 rounded-full bg-secondary animate-pulse" />
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 group outline-none">
+                      <Avatar className="w-8 h-8 ring-1 ring-border group-hover:ring-2 group-hover:ring-primary transition-all">
+                        <AvatarImage src={user.avatarUrl} alt={user.name} />
+                        <AvatarFallback>
+                          {user.name?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium group-hover:text-primary transition-colors">
+                        {user.name}
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center cursor-pointer">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>{language === "VI" ? "Hồ sơ" : "Profile"}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist" className="flex items-center cursor-pointer">
+                        <Heart className="mr-2 h-4 w-4" />
+                        <span>{language === "VI" ? "Yêu thích" : "Wishlist"}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await signOut();
+                        navigate("/");
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>{language === "VI" ? "Đăng xuất" : "Log out"}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <>
                   <Link to="/login">
@@ -216,6 +261,14 @@ const Navbar = () => {
                     {item.label}
                   </button>
                 ))}
+                <Link
+                  to="/chat"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/80 rounded-lg transition-all"
+                >
+                  <Bot className="w-4 h-4" />
+                  {language === "VI" ? "AI Trợ Lý" : "AI Assistant"}
+                </Link>
               </div>
               
               {/* Mobile Search */}
@@ -236,31 +289,40 @@ const Navbar = () => {
               
               {/* Mobile Auth Buttons */}
               <div className="flex gap-2">
-                {user ? (
+                {loading ? (
+                  <div className="w-full h-10 rounded-lg bg-secondary animate-pulse" />
+                ) : user ? (
                   <>
                     <Button
                       variant="outline"
                       className="flex-1"
-                      onClick={() => navigate("/profile")}
+                      onClick={() => {
+                        navigate("/profile");
+                        setIsMobileMenuOpen(false);
+                      }}
                     >
-                      Hồ sơ
+                      {language === "VI" ? "Hồ sơ" : "Profile"}
                     </Button>
                     <Button
                       variant="default"
                       className="flex-1"
-                      onClick={logout}
+                      onClick={async () => {
+                        await signOut();
+                        setIsMobileMenuOpen(false);
+                        navigate("/");
+                      }}
                     >
-                      Log out
+                      {language === "VI" ? "Đăng xuất" : "Log out"}
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="flex-1">
+                    <Link to="/login" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full">
                         {t(language, "nav_login")}
                       </Button>
                     </Link>
-                    <Link to="/signup" className="flex-1">
+                    <Link to="/signup" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="default" className="w-full">
                         {t(language, "nav_signup")}
                       </Button>
