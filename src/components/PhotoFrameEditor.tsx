@@ -339,10 +339,10 @@ const PhotoFrameEditor = () => {
 
       // Calculate canvas size (add extra space for shadow if needed)
       const shadowOffset = frame.shadow ? 8 : 0;
-      const totalWidth =
-        imageWidth + padding * 2 + borderWidth * 2 + shadowOffset;
-      const totalHeight =
-        imageHeight + padding * 2 + borderWidth * 2 + shadowOffset;
+      // For SVG frames, use padding; for canvas frames, use borderWidth + padding
+      const frameSpace = frame.style === "svg" ? padding * 2 : padding * 2 + borderWidth * 2;
+      const totalWidth = imageWidth + frameSpace + shadowOffset;
+      const totalHeight = imageHeight + frameSpace + shadowOffset;
 
       canvas.width = totalWidth;
       canvas.height = totalHeight;
@@ -376,18 +376,15 @@ const PhotoFrameEditor = () => {
       }
 
 
-      // Draw frame - check if SVG or canvas-based
-      if (frame.style === "svg" && frame.svgPath) {
-        // For SVG frames, draw SVG first
-        await drawSVGFrame(ctx, imageWidth, imageHeight, frame.svgPath, padding);
-      } else {
-        // For canvas-based frames, use existing logic
+      // For SVG frames, draw image first (no frame yet)
+      // For canvas frames, draw frame first
+      if (frame.style !== "svg" || !frame.svgPath) {
         drawFrame(ctx, imageWidth, imageHeight, frame, shadowOffset);
       }
 
       // Draw image in the center
-      const imageX = frame.style === "svg" ? padding : shadowOffset + borderWidth + padding;
-      const imageY = frame.style === "svg" ? padding : shadowOffset + borderWidth + padding;
+      const imageX = frame.style === "svg" ? 0 : shadowOffset + borderWidth + padding;
+      const imageY = frame.style === "svg" ? 0 : shadowOffset + borderWidth + padding;
 
       // Clip to rounded rectangle if needed
       if (frame.borderRadius > 0) {
@@ -407,6 +404,11 @@ const PhotoFrameEditor = () => {
 
       if (frame.borderRadius > 0) {
         ctx.restore();
+      }
+
+      // For SVG frames, draw SVG overlay on top of the image
+      if (frame.style === "svg" && frame.svgPath) {
+        await drawSVGFrame(ctx, imageWidth, imageHeight, frame.svgPath, padding);
       }
 
       // Convert to blob and create URL
