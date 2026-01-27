@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # --- DỊCH VỤ BACKEND ---
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: tour-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    env_file:
+      - .env
+
+  # --- DỊCH VỤ FRONTEND ---
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: tour-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    environment:
+      # Cái này quan trọng: Chỉ cho Frontend biết Backend đang ở đâu
+      # Khi chạy Docker Compose, hostname chính là tên service ("api")
+      - VITE_API_URL=http://api:8000
+    depends_on:
+      - api # Frontend chỉ chạy sau khi Backend đã khởi động
