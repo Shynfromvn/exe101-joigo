@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
 from supabase import create_client
 import numpy as np
 

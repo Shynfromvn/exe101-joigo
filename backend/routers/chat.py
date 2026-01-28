@@ -6,18 +6,6 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 from core.config import supabase
-from sentence_transformers import SentenceTransformer
-import torch
-
-# --- Initialize Vietnamese Embedding Model ---
-print("Loading Vietnamese Embedding Model...")
-try:
-    embedding_model = SentenceTransformer("dangvantuan/vietnamese-embedding")
-    embedding_model.max_seq_length = 2048
-    print("✅ Vietnamese Embedding Model loaded successfully")
-except Exception as e:
-    print(f"❌ Error loading embedding model: {e}")
-    embedding_model = None
 
 # --- Configuration ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -80,19 +68,20 @@ def contextualize_query(chat_history: List[str], new_question: str) -> str:
 
 def generate_query_embedding(text: str):
     """
-    Generate embedding using Vietnamese SentenceTransformer model
+    Generate embedding using Gemini API
     """
-    if embedding_model is None:
-        print("❌ Embedding model not loaded")
-        return None
-    
     try:
-        # Encode text to get embedding vector
-        embedding = embedding_model.encode(text, convert_to_numpy=True)
-        # Convert to list for JSON serialization
-        return embedding.tolist()
+        # Use Gemini embedding model
+        result = client.models.embed_content(
+            model="models/text-embedding-004",
+            contents=text
+        )
+        # Get the embedding vector and convert to list
+        embedding = result.embeddings[0].values
+        print(f"✅ Generated embedding with dimension: {len(embedding)}")
+        return embedding
     except Exception as e:
-        print(f"❌ Error generating embedding: {e}")
+        print(f"❌ Error generating embedding with Gemini: {e}")
         return None
 
 def format_price(price: float, language: str) -> str:
