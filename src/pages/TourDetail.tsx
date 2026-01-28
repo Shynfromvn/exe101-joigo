@@ -15,7 +15,7 @@ import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import { useTours } from "@/contexts/TourContext";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {

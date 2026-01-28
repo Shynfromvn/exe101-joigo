@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 
 interface LandmarkCardProps {
   image: string;

@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import { getBlogBySlug } from "@/lib/blogs";
 import { Button } from "@/components/ui/button";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 
 const BlogDetail = () => {
   const { slug } = useParams();

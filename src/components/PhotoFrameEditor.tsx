@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useTours } from "@/contexts/TourContext";
-import { t, type Language } from "@/lib/i18n";
+import { t, type Language } from "@/lib/i18n_temp";
 
 interface FrameConfig {
   id: string;

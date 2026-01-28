@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 
 // Helper function to check if tour has a specific type
 const tourHasType = (tour: any, typeToCheck: string): boolean => {

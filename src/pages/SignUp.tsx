@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 import { toast } from "sonner";
 
 const SignUp = () => {

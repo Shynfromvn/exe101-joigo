@@ -3,7 +3,7 @@ import { Image, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 
 const PhotoFrameBanner = () => {
   const { language } = useTours();

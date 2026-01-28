@@ -30,7 +30,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 import { hanoiBlogs } from "@/lib/blogs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import langnonchuong from "@/assets/lang-non-chuong.webp";

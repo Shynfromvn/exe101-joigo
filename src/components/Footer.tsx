@@ -8,7 +8,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
+import { t } from "@/lib/i18n_temp";
 
 const Footer = () => {
   const { language } = useTours();
