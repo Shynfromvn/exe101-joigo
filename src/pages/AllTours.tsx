@@ -7,7 +7,7 @@ import TourCard from "@/components/TourCard";
 import FloatingContact from "@/components/FloatingContact";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { hanoiBlogs } from "@/lib/blogs";
+import { hanoiBlogs } from "@/lib/blogs_temp";
 import {
   Select,
   SelectContent,

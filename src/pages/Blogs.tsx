@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { hanoiBlogs } from "@/lib/blogs";
+import { hanoiBlogs } from "@/lib/blogs_temp";
 import { useTours } from "@/contexts/TourContext";
 import { t } from "@/lib/i18n";
 
