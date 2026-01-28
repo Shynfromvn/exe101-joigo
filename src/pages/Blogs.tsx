@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { hanoiBlogs } from "@/lib/blogs";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n_temp";
+import { t } from "@/lib/i18n";
 
 const Blogs = () => {
   const { language } = useTours();

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n_temp";
+import { t } from "@/lib/i18n";
 import { QRCodeSVG } from "qrcode.react";
 import vanMieu from "@/assets/van-mieu.jpg";
 

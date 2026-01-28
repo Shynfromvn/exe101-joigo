@@ -4,7 +4,7 @@ import { Search, Menu, X, Heart, User, LogOut, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n_temp";
+import { t } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {

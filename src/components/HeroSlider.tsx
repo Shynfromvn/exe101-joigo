@@ -6,7 +6,7 @@ import langtrePhuVinh from "@/assets/lang-nghe-may-tre-dan-phu-vinh.jpg";
 import chuonchuontre from "@/assets/chuon-chuon-tre.jpg";
 import game from "@/assets/Game.jpg";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n_temp";
+import { t } from "@/lib/i18n";
 
 const slides = [
   {
