@@ -5,5 +5,3 @@ uvicorn
 supabase
 pydantic
 google-genai
-sentence-transformers
-torch

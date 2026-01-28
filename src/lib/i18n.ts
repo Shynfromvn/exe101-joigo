@@ -563,6 +563,18 @@ const dictionary: Dictionary = {
     EN: "Bold Frame",
     VI: "Khung Nổi Bật",
   },
+  photo_frame_frame_ornamental: {
+    EN: "Ornamental Frame",
+    VI: "Khung Trang Trí",
+  },
+  photo_frame_frame_floral: {
+    EN: "Floral Frame",
+    VI: "Khung Hoa",
+  },
+  photo_frame_demo: {
+    EN: "Demo Frame",
+    VI: "Khung Demo",
+  },
 };
 
 export function t(
