@@ -1,7 +1,7 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getBlogBySlug } from "@/lib/blogs_temp";
+import { getBlogBySlug } from "@/lib/blogs";
 import { Button } from "@/components/ui/button";
 import { useTours } from "@/contexts/TourContext";
 import { t } from "@/lib/i18n";
