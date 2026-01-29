@@ -1,0 +1,9 @@
+# Bỏ qua code backend và cấu hình Docker
+backend/
+requirements.txt
+Dockerfile
+Dockerfile.backend
+Dockerfile.frontend
+docker-compose.yml
+.env
+.venv

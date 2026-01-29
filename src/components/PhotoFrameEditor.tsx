@@ -16,18 +16,22 @@ import { t, type Language } from "@/lib/i18n";
 interface FrameConfig {
   id: string;
   nameKey:
-    | "photo_frame_frame_classic"
-    | "photo_frame_frame_modern"
-    | "photo_frame_frame_elegant"
-    | "photo_frame_frame_minimal"
-    | "photo_frame_frame_vintage"
-    | "photo_frame_frame_bold";
+  | "photo_frame_frame_classic"
+  | "photo_frame_frame_modern"
+  | "photo_frame_frame_elegant"
+  | "photo_frame_frame_minimal"
+  | "photo_frame_frame_vintage"
+  | "photo_frame_frame_bold"
+  | "photo_frame_frame_ornamental"
+  | "photo_frame_demo"
+  | "photo_frame_frame_floral";
   borderWidth: number;
   borderColor: string;
   borderRadius: number;
   padding: number;
   shadow: boolean;
-  style: "solid" | "dashed" | "double" | "ornate";
+  style: "solid" | "dashed" | "double" | "ornate" | "svg";
+  svgPath?: string;
 }
 
 const frameConfigs: FrameConfig[] = [
@@ -91,6 +95,39 @@ const frameConfigs: FrameConfig[] = [
     shadow: true,
     style: "solid",
   },
+  {
+    id: "ornamental",
+    nameKey: "photo_frame_frame_ornamental",
+    borderWidth: 0,
+    borderColor: "transparent",
+    borderRadius: 0,
+    padding: 50,
+    shadow: false,
+    style: "svg",
+    svgPath: "/frames/ornamental-frame.svg",
+  },
+  {
+    id: "floral",
+    nameKey: "photo_frame_frame_floral",
+    borderWidth: 0,
+    borderColor: "transparent",
+    borderRadius: 0,
+    padding: 50,
+    shadow: false,
+    style: "svg",
+    svgPath: "/frames/floral-frame.svg",
+  },
+  {
+    id: "demo",
+    nameKey: "photo_frame_demo",
+    borderWidth: 0,
+    borderColor: "transparent",
+    borderRadius: 0,
+    padding: 50,
+    shadow: false,
+    style: "svg",
+    svgPath: "/frames/demo.svg",
+  }
 ];
 
 const PhotoFrameEditor = () => {
@@ -231,12 +268,54 @@ const PhotoFrameEditor = () => {
     ctx.closePath();
   };
 
-  const applyFrame = () => {
+  // Helper function to load SVG and convert to Image
+  const loadSVGFrame = (svgPath: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      fetch(svgPath)
+        .then((response) => response.text())
+        .then((svgText) => {
+          const img = new Image();
+          const blob = new Blob([svgText], { type: "image/svg+xml" });
+          const url = URL.createObjectURL(blob);
+
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
+          };
+          img.onerror = reject;
+          img.src = url;
+        })
+        .catch(reject);
+    });
+  };
+
+  // Helper function to draw SVG frame
+  const drawSVGFrame = async (
+    ctx: CanvasRenderingContext2D,
+    imageWidth: number,
+    imageHeight: number,
+    svgPath: string,
+    padding: number
+  ) => {
+    try {
+      const svgImage = await loadSVGFrame(svgPath);
+      const totalWidth = imageWidth + padding * 2;
+      const totalHeight = imageHeight + padding * 2;
+
+      // Draw SVG frame scaled to fit the total dimensions
+      ctx.drawImage(svgImage, 0, 0, totalWidth, totalHeight);
+    } catch (error) {
+      console.error("Error loading SVG frame:", error);
+      toast.error("Failed to load SVG frame");
+    }
+  };
+
+  const applyFrame = async () => {
     if (!selectedImage || !canvasRef.current) return;
 
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -260,10 +339,10 @@ const PhotoFrameEditor = () => {
 
       // Calculate canvas size (add extra space for shadow if needed)
       const shadowOffset = frame.shadow ? 8 : 0;
-      const totalWidth =
-        imageWidth + padding * 2 + borderWidth * 2 + shadowOffset;
-      const totalHeight =
-        imageHeight + padding * 2 + borderWidth * 2 + shadowOffset;
+      // For SVG frames, use padding; for canvas frames, use borderWidth + padding
+      const frameSpace = frame.style === "svg" ? padding * 2 : padding * 2 + borderWidth * 2;
+      const totalWidth = imageWidth + frameSpace + shadowOffset;
+      const totalHeight = imageHeight + frameSpace + shadowOffset;
 
       canvas.width = totalWidth;
       canvas.height = totalHeight;
@@ -296,12 +375,16 @@ const PhotoFrameEditor = () => {
         ctx.restore();
       }
 
-      // Draw frame
-      drawFrame(ctx, imageWidth, imageHeight, frame, shadowOffset);
+
+      // For SVG frames, draw image first (no frame yet)
+      // For canvas frames, draw frame first
+      if (frame.style !== "svg" || !frame.svgPath) {
+        drawFrame(ctx, imageWidth, imageHeight, frame, shadowOffset);
+      }
 
       // Draw image in the center
-      const imageX = shadowOffset + borderWidth + padding;
-      const imageY = shadowOffset + borderWidth + padding;
+      const imageX = frame.style === "svg" ? 0 : shadowOffset + borderWidth + padding;
+      const imageY = frame.style === "svg" ? 0 : shadowOffset + borderWidth + padding;
 
       // Clip to rounded rectangle if needed
       if (frame.borderRadius > 0) {
@@ -321,6 +404,11 @@ const PhotoFrameEditor = () => {
 
       if (frame.borderRadius > 0) {
         ctx.restore();
+      }
+
+      // For SVG frames, draw SVG overlay on top of the image
+      if (frame.style === "svg" && frame.svgPath) {
+        await drawSVGFrame(ctx, imageWidth, imageHeight, frame.svgPath, padding);
       }
 
       // Convert to blob and create URL
@@ -604,21 +692,30 @@ const PhotoFrameEditor = () => {
                     <button
                       key={frame.id}
                       onClick={() => setSelectedFrame(frame)}
-                      className={`p-4 border-2 rounded-lg transition-all ${
-                        selectedFrame.id === frame.id
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:border-primary/50"
-                      }`}
+                      className={`p-4 border-2 rounded-lg transition-all ${selectedFrame.id === frame.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50"
+                        }`}
                     >
-                      <div
-                        className="w-full h-24 mb-2 rounded"
-                        style={{
-                          backgroundColor: frame.borderColor,
-                          borderWidth: `${frame.borderWidth / 3}px`,
-                          borderStyle: "solid",
-                          borderColor: frame.borderColor,
-                        }}
-                      />
+                      {frame.style === "svg" && frame.svgPath ? (
+                        <div className="w-full h-24 mb-2 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
+                          <img
+                            src={frame.svgPath}
+                            alt={t(language, frame.nameKey)}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="w-full h-24 mb-2 rounded"
+                          style={{
+                            backgroundColor: frame.borderColor,
+                            borderWidth: `${frame.borderWidth / 3}px`,
+                            borderStyle: "solid",
+                            borderColor: frame.borderColor,
+                          }}
+                        />
+                      )}
                       <p className="text-sm font-medium text-center">
                         {t(language, frame.nameKey)}
                       </p>
