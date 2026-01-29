@@ -1,0 +1,4 @@
+activate moi truong: .venv/Scripts/activate
+backend: cd backend --> uvicorn main:app --reload
+
+frontend: npm run dev
