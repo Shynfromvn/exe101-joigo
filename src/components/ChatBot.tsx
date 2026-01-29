@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User as UserIcon, Sparkles, Loader2 } from "lucide-react";
+import { Bot, Send, Sparkles, Users, Landmark, Wallet, Palette, Paperclip, Mic, MessageCircle, Lightbulb, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useTours } from "@/contexts/TourContext";
+import { Link } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -16,6 +17,14 @@ interface Message {
 }
 
 const API_BASE_URL = "http://127.0.0.1:8000";
+
+// Định nghĩa suggested questions với icon và cả 2 ngôn ngữ
+const suggestedQuestionsData = [
+  { icon: Users, textVI: "Tour nào phù hợp với gia đình?", textEN: "Which tour is suitable for families?" },
+  { icon: Landmark, textVI: "Tôi muốn tìm tour văn hóa truyền thống", textEN: "I want to find traditional cultural tours" },
+  { icon: Wallet, textVI: "Tour nào có giá rẻ nhất?", textEN: "Which tour has the cheapest price?" },
+  { icon: Palette, textVI: "Giới thiệu tour làng nghề", textEN: "Introduce craft village tours" },
+];
 
 export const ChatBot = () => {
   // Lấy hoặc tạo session_id từ localStorage
@@ -49,7 +58,6 @@ export const ChatBot = () => {
 
   // Hàm loại bỏ markdown formatting
   const removeMarkdown = (text: string): string => {
-    // Loại bỏ **bold** và *italic*
     return text.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1");
   };
 
@@ -117,8 +125,6 @@ export const ChatBot = () => {
       }
 
       const data = await response.json();
-
-      // Loại bỏ markdown formatting từ response
       const cleanedResponse = removeMarkdown(data.response);
 
       const assistantMessage: Message = {
@@ -132,18 +138,19 @@ export const ChatBot = () => {
     } catch (error) {
       console.error("Chat error:", error);
       toast({
-        title: "Lỗi kết nối",
-        description:
-          "Không thể kết nối với chatbot. Vui lòng thử lại sau.",
+        title: language === "EN" ? "Connection Error" : "Lỗi kết nối",
+        description: language === "EN" 
+          ? "Cannot connect to chatbot. Please try again later."
+          : "Không thể kết nối với chatbot. Vui lòng thử lại sau.",
         variant: "destructive",
       });
 
-      // Add error message to chat
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content:
-          "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau hoặc liên hệ hotline để được hỗ trợ.",
+        content: language === "EN"
+          ? "Sorry, I'm experiencing technical issues. Please try again later or contact our hotline for support."
+          : "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau hoặc liên hệ hotline để được hỗ trợ.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -159,92 +166,70 @@ export const ChatBot = () => {
     }
   };
 
-  const suggestedQuestions =
-    language === "EN"
-      ? [
-          "Which tour is suitable for families?",
-          "I want to find traditional cultural tours",
-          "Which tour has the cheapest price?",
-          "Introduce craft village tours",
-        ]
-      : [
-          "Tour nào phù hợp với gia đình?",
-          "Tôi muốn tìm tour văn hóa truyền thống",
-          "Tour nào có giá rẻ nhất?",
-          "Giới thiệu tour làng nghề",
-        ];
+  // Tạo suggestedQuestions dựa trên ngôn ngữ hiện tại
+  const suggestedQuestions = suggestedQuestionsData.map(item => ({
+    icon: item.icon,
+    text: language === "EN" ? item.textEN : item.textVI
+  }));
 
   const handleSuggestionClick = (question: string) => {
     setInputValue(question);
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-6 rounded-t-lg">
-        <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-3 rounded-full">
-            <Bot className="w-6 h-6" />
+
+    <div className="flex flex-col h-full bg-gray-50/50">
+      {/* Header với gradient */}
+      <div className="bg-gradient-to-r from-orange-500 via-orange-400 to-fuchsia-500 px-6 py-5 rounded-t-3xl">
+        <div className="flex items-center gap-4">
+          <div className="w-[52px] h-[52px] bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Bot className="w-7 h-7 text-white" />
           </div>
-          <div>
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              JOIGO AI Assistant
-              <Sparkles className="w-4 h-4" />
-            </h2>
-            <p className="text-sm text-white/80">
-              Trợ lý ảo tư vấn tour du lịch
-            </p>
+          <div className="flex-1">
+            <h2 className="text-white font-semibold text-lg">Joigo AI Assistant</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"></span>
+              </span>
+              <span className="text-white/90 text-sm">
+                {language === "EN" ? "Online" : "Đang hoạt động"}
+              </span>
+            </div>
+          </div>
+          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
         </div>
       </div>
 
       {/* Messages Area */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-gray-50">
-        <div className="space-y-4 max-w-3xl mx-auto">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 px-5 py-4">
+        <div className="space-y-4">
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+            <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
               {message.role === "assistant" && (
-                <Avatar className="w-8 h-8 mt-1">
-                  <AvatarFallback className="bg-primary text-white">
-                    <Bot className="w-4 h-4" />
+                <Avatar className="w-9 h-9 shrink-0 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl">
+                  <AvatarFallback className="bg-transparent">
+                    <Bot className="w-5 h-5 text-white" />
                   </AvatarFallback>
                 </Avatar>
               )}
-
-              <Card
-                className={`p-4 max-w-[80%] ${
+              <div
+                className={`max-w-[75%] px-4 py-3 ${
                   message.role === "user"
-                    ? "bg-primary text-white"
-                    : "bg-white border-gray-200"
+                    ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white rounded-[20px] rounded-br-md"
+                    : "bg-white border border-gray-100 text-gray-700 rounded-[20px] rounded-bl-md shadow-sm"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                  {message.content}
+                <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{removeMarkdown(message.content)}</p>
+                <p className={`text-xs mt-2 ${message.role === "user" ? "text-white/70" : "text-gray-400"}`}>
+                  {message.timestamp.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
                 </p>
-                <p
-                  className={`text-xs mt-2 ${
-                    message.role === "user"
-                      ? "text-white/70"
-                      : "text-gray-500"
-                  }`}
-                >
-                  {message.timestamp.toLocaleTimeString("vi-VN", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </Card>
-
+              </div>
               {message.role === "user" && (
-                <Avatar className="w-8 h-8 mt-1">
-                  <AvatarFallback className="bg-secondary text-white">
-                    <UserIcon className="w-4 h-4" />
-                  </AvatarFallback>
+                <Avatar className="w-9 h-9 shrink-0 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl">
+                  <AvatarFallback className="bg-transparent text-white text-sm font-medium">B</AvatarFallback>
                 </Avatar>
               )}
             </div>
@@ -252,80 +237,80 @@ export const ChatBot = () => {
 
           {isLoading && (
             <div className="flex gap-3 justify-start">
-              <Avatar className="w-8 h-8 mt-1">
-                <AvatarFallback className="bg-primary text-white">
-                  <Bot className="w-4 h-4" />
+              <Avatar className="w-9 h-9 shrink-0 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl">
+                <AvatarFallback className="bg-transparent">
+                  <Bot className="w-5 h-5 text-white" />
                 </AvatarFallback>
               </Avatar>
-              <Card className="p-4 bg-white border-gray-200">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <p className="text-sm text-gray-600">
-                    {language === "EN" ? "Thinking..." : "Đang suy nghĩ..."}
-                  </p>
+              <div className="bg-white border border-gray-100 rounded-[20px] rounded-bl-md px-4 py-3 shadow-sm">
+                <div className="flex gap-1.5">
+                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
                 </div>
-              </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Suggestions */}
+          {messages.length === 1 && (
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Lightbulb className="w-4 h-4 text-orange-500" />
+                <span className="text-sm text-gray-500 font-medium">
+                  {language === "EN" ? "Suggestions for you" : "Gợi ý cho bạn"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {suggestedQuestions.map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSuggestionClick(item.text)}
+                    className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left transition-all duration-200 ${
+                      index === 0
+                        ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-200"
+                        : "bg-white border border-gray-100 text-gray-700 hover:border-orange-200 hover:shadow-md"
+                    }`}
+                  >
+                    <item.icon className={`w-4 h-4 ${index === 0 ? "text-white" : "text-orange-500"}`} />
+                    <span className="text-sm font-medium">{item.text}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
-
-        {/* Suggested Questions */}
-        {messages.length === 1 && !isLoading && (
-          <div className="mt-6 max-w-3xl mx-auto">
-            <p className="text-sm text-gray-600 mb-3 font-medium">
-              💡 {language === "EN" ? "Suggested questions:" : "Gợi ý câu hỏi:"}
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {suggestedQuestions.map((question, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="justify-start text-left h-auto py-3 px-4 hover:bg-primary/5 hover:border-primary/50"
-                  onClick={() => handleSuggestionClick(question)}
-                >
-                  <span className="text-sm">{question}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
       </ScrollArea>
 
-      {/* Input Area */}
-      <div className="p-4 bg-white border-t">
-        <div className="flex gap-2 max-w-3xl mx-auto">
+      {/* Input Section */}
+      <div className="p-4 border-t border-gray-100 bg-white">
+        <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-2">
+          <MessageCircle className="w-5 h-5 text-gray-400" />
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={
-              language === "EN"
-                ? "Enter your question..."
-                : "Nhập câu hỏi của bạn..."
-            }
+            placeholder={language === "EN" ? "Type a message..." : "Nhập tin nhắn..."}
+            className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-700 placeholder:text-gray-400"
             disabled={isLoading}
-            className="flex-1"
           />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!inputValue.trim() || isLoading}
-            size="icon"
-            className="shrink-0"
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200">
+              <Paperclip className="w-4 h-4 text-gray-500" />
+            </Button>
+            <Button variant="ghost" size="icon" className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200">
+              <Mic className="w-4 h-4 text-gray-500" />
+            </Button>
+            <Button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isLoading}
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 shadow-lg shadow-orange-200 disabled:opacity-50"
+            >
+              <Send className="w-4 h-4 text-white" />
+            </Button>
+          </div>
         </div>
-        <p className="text-xs text-gray-500 text-center mt-2">
-          {language === "EN"
-            ? "Chatbot"
-            : "Chatbot"}
-        </p>
       </div>
     </div>
   );
-};
-
+}
