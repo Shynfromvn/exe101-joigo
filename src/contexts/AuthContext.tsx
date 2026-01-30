@@ -7,6 +7,11 @@ export type AuthUser = {
   email: string;
   name?: string;
   avatarUrl?: string;
+  role?: 'admin' | 'user';
+  gender?: 'male' | 'female' | 'other';
+  birthdate?: string;
+  city?: string;
+  mobileNumber?: string;
 };
 
 type AuthContextValue = {
@@ -18,6 +23,8 @@ type AuthContextValue = {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   getAccessToken: () => string | null;
+  updateUser: (data: Partial<AuthUser>) => Promise<void>;
+  fetchUserProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -27,7 +34,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Hàm chuyển đổi Supabase User → AuthUser
+  // Hàm lấy profile từ Supabase profiles table
+  const fetchUserProfile = async () => {
+    try {
+      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      if (!supabaseUser) {
+        setUser(null);
+        return;
+      }
+
+      // Lấy profile từ profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      setUser({
+        id: supabaseUser.id,
+        email: supabaseUser.email || "",
+        name: profile?.name || supabaseUser.user_metadata?.name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split("@")[0] || "User",
+        avatarUrl: supabaseUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(supabaseUser.email || "U")}`,
+        role: profile?.role || 'user',
+        gender: profile?.gender,
+        birthdate: profile?.birthdate,
+        city: profile?.city,
+        mobileNumber: profile?.mobile_number,
+      });
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  // Hàm chuyển đổi Supabase User → AuthUser (deprecated, sử dụng fetchUserProfile)
   const mapUser = (supabaseUser: User | null): AuthUser | null => {
     if (!supabaseUser) return null;
     return {
@@ -35,6 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       email: supabaseUser.email || "",
       name: supabaseUser.user_metadata?.name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split("@")[0] || "User",
       avatarUrl: supabaseUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(supabaseUser.email || "U")}`,
+      role: 'user',
     };
   };
 
@@ -43,7 +83,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Lấy session hiện tại
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(mapUser(session?.user || null));
+      if (session?.user) {
+        fetchUserProfile();
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
@@ -52,7 +96,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setUser(mapUser(session?.user || null));
+      if (session?.user) {
+        fetchUserProfile();
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
@@ -112,6 +160,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return session?.access_token || null;
   };
 
+  // Cập nhật thông tin user
+  const updateUser = async (data: Partial<AuthUser>) => {
+    if (!user) throw new Error('No user logged in');
+    
+    const updateData: any = {};
+    if (data.name) updateData.name = data.name;
+    if (data.gender) updateData.gender = data.gender;
+    if (data.birthdate) updateData.birthdate = data.birthdate;
+    if (data.city) updateData.city = data.city;
+    if (data.mobileNumber) updateData.mobile_number = data.mobileNumber;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updateData)
+      .eq('id', user.id);
+
+    if (error) throw error;
+
+    // Reload user profile
+    await fetchUserProfile();
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -123,6 +193,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signInWithGoogle,
         signOut,
         getAccessToken,
+        updateUser,
+        fetchUserProfile,
       }}
     >
       {children}
