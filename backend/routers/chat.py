@@ -1,20 +1,64 @@
 import os
 import uuid
 from google import genai
-from google.genai import types
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
-from core.config import supabase
+from typing import Optional, List
+from pathlib import Path
+import json
 
-# --- Configuration ---
+# --- Cấu hình ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 client = genai.Client(api_key=GOOGLE_API_KEY)
 router = APIRouter(prefix="/api/chat", tags=["Chatbot"])
 
-# --- Fake chat memory (Production should use Redis/DB) ---
-# Format: session_id -> list of messages
-fake_chat_memory = {} 
+# Tên model chuẩn (Sử dụng Flash 1.5 cho nhanh và rẻ, context lớn)
+MODEL_NAME = "gemini-2.5-flash"
+
+# --- Biến toàn cục chứa dữ liệu Tour ---
+TOUR_CONTEXT = ""
+
+def format_price(price):
+    """Hàm format giá tiền VNĐ"""
+    return f"{price:,.0f}đ".replace(",", ".")
+
+def load_tour_data():
+    global TOUR_CONTEXT
+    try:
+        current_file_path = Path(__file__).resolve()
+        # Đổi tên file thành tours.json
+        file_path = current_file_path.parent.parent / "data" / "tours.json"
+        
+        if file_path.exists():
+            with open(file_path, "r", encoding="utf-8") as f:
+                tours_data = json.load(f) # Đọc dưới dạng List Python
+            
+            # --- BƯỚC QUAN TRỌNG: CHUYỂN JSON -> TEXT ĐỂ TIẾT KIỆM TOKEN ---
+            text_lines = []
+            for tour in tours_data:
+                # Tạo một dòng text ngắn gọn cho mỗi tour
+                line = (
+                    f"- {tour['title']}. "
+                    f"Giá: {format_price(tour['price'])}. "
+                    f"Chi tiết: {tour['description']}"
+                )
+                text_lines.append(line)
+            
+            # Nối lại thành một đoạn văn bản
+            TOUR_CONTEXT = "\n".join(text_lines)
+            
+            print(f"✅ Đã load và convert {len(tours_data)} tour sang text.")
+        else:
+            print(f"⚠️ Không tìm thấy file: {file_path}")
+            TOUR_CONTEXT = ""
+            
+    except Exception as e:
+        print(f"❌ Lỗi đọc file JSON: {e}")
+# Gọi hàm load ngay khi file này được import/chạy
+load_tour_data()
+
+# --- Fake chat memory ---
+fake_chat_memory = {}
 
 class ChatRequest(BaseModel):
     message: str
@@ -27,192 +71,106 @@ def get_chat_history(session_id: str):
 def save_chat_history(session_id: str, role: str, content: str):
     if session_id not in fake_chat_memory:
         fake_chat_memory[session_id] = []
-    # Keep only last 10 messages to save tokens
+    # Lưu user và model
     fake_chat_memory[session_id].append(f"{role}: {content}")
-    if len(fake_chat_memory[session_id]) > 10:
+    # Giữ lại 20 tin nhắn gần nhất để model nhớ ngữ cảnh hội thoại tốt hơn
+    if len(fake_chat_memory[session_id]) > 20:
         fake_chat_memory[session_id].pop(0)
 
-# --- New step: Rephrase query (STANDALONE QUERY) ---
-def contextualize_query(chat_history: List[str], new_question: str) -> str:
-    """
-    Dùng Gemini để viết lại câu hỏi dựa trên lịch sử chat.
-    Ví dụ: History="Tour HN", User="Giá?" -> Output="Giá tour HN"
-    """
-    if not chat_history:
-        return new_question
-
-    history_text = "\n".join(chat_history)
-    prompt = f"""
-    Dựa trên lịch sử hội thoại dưới đây và câu hỏi mới nhất của người dùng, 
-    hãy viết lại câu hỏi mới sao cho nó đầy đủ ý nghĩa, độc lập và có thể dùng để tìm kiếm thông tin.
-    KHÔNG trả lời câu hỏi, chỉ viết lại câu hỏi. Giữ nguyên ngôn ngữ tiếng Việt.
-    
-    Lịch sử hội thoại:
-    {history_text}
-    
-    Câu hỏi mới: {new_question}
-    
-    Câu hỏi viết lại (Standalone query):
-    """
-    
-    try:
-        response = client.models.generate_content(
-            contents=prompt,
-            model="gemini-2.5-flash",
-        )
-        refined_query = response.text.strip()
-        print(f"Rephrased Query: '{new_question}' -> '{refined_query}'")
-        return refined_query
-    except Exception:
-        return new_question
-
-def generate_query_embedding(text: str):
-    """
-    Generate embedding using Gemini API
-    """
-    try:
-        # Use Gemini embedding model
-        result = client.models.embed_content(
-            model="models/text-embedding-004",
-            contents=text
-        )
-        # Get the embedding vector and convert to list
-        embedding = result.embeddings[0].values
-        print(f"✅ Generated embedding with dimension: {len(embedding)}")
-        return embedding
-    except Exception as e:
-        print(f"❌ Error generating embedding with Gemini: {e}")
-        return None
-
-def format_price(price: float, language: str) -> str:
-    """Format price according to language: USD for EN, VND for VI"""
-    if language == "EN":
-        return f"${price:.2f}"
-    else:
-        vnd_price = price * 26275
-        return f"{vnd_price:,.0f}₫"
-
 def remove_markdown(text: str) -> str:
-    """Remove markdown formatting like **bold**"""
     import re
+    # Xoá **bold**, *italic*
     text = re.sub(r'\*\*([^*]+)\*\*', r'\1', text)
     text = re.sub(r'\*([^*]+)\*', r'\1', text)
-    return text
+    return text.strip()
 
 @router.post("")
 async def chat_with_gemini(request: ChatRequest):
     user_query = request.message
+    session_id = request.session_id or str(uuid.uuid4())
     language = request.language or "VI"
-    session_id = request.session_id
-    if not session_id:
-        session_id = str(uuid.uuid4())
-    
-    # 1. Get chat history
+
+    # 1. Lấy lịch sử chat
     history = get_chat_history(session_id)
-    
-    # 2. Rephrase query (Contextualization)
-    search_query = contextualize_query(history, user_query)
-    
-    # 3. Semantic Search by rephrased query (search_query)
-    relevant_tours = []
-    query_embedding = generate_query_embedding(search_query)
-    
-    if query_embedding:
-        print(f"Searching for: {search_query}")
-        print(f"Query embedding dimension: {len(query_embedding)}")
-        try:
-            response = supabase.rpc(
-                'match_tours',
-                {
-                    'query_embedding': query_embedding,
-                    'match_threshold': 0.4,
-                    'match_count': 4
-                }
-            ).execute()
-            relevant_tours = response.data
-        except Exception as e:
-            print(f"Database error: {e}")
-
-    # 4. Create context text with formatted price
-    if not relevant_tours:
-        if language == "EN":
-            context_text = "No specific tour information found in the database."
-        else:
-            context_text = "Không tìm thấy thông tin tour cụ thể trong dữ liệu."
-    else:
-        if language == "EN":
-            context_text = "TOUR INFORMATION FOUND:\n"
-        else:
-            context_text = "THÔNG TIN TOUR TÌM THẤY:\n"
-        for tour in relevant_tours:
-            price_formatted = format_price(tour.get('price', 0), language)
-            if language == "EN":
-                context_text += f"- {tour['title']}: Price {price_formatted}. {tour.get('description')}\n"
-            else:
-                context_text += f"- {tour['title']}: Giá {price_formatted}. {tour.get('description')}\n"
-
-    # 5. Final prompt
     history_text = "\n".join(history)
+
+    # 2. Tạo Prompt (Kết hợp: Chỉ thị + Dữ liệu file text + Lịch sử chat + Câu hỏi mới)
     
-    # Create prompt according to language
-    if language == "EN":
-        final_prompt = f"""
-        You are JOIGO's virtual assistant. Please answer the question based on the provided information.
+    # Prompt cho Tiếng Việt
+    if language == "VI":
+        system_instruction = f"""
+        Bạn là trợ lý ảo AI của công ty du lịch JOIGO.
         
-        CHAT HISTORY:
-        {history_text}
+        NHIỆM VỤ CỦA BẠN:
+        Trả lời câu hỏi của khách hàng dựa trên CHÍNH XÁC thông tin dữ liệu tour dưới đây.
         
-        TOUR DATA INFORMATION (Context):
-        {context_text}
-        
-        CUSTOMER QUESTION: "{user_query}"
-        
-        REQUIREMENTS:
-        - If information is available in Context, provide detailed answers.
-        - If the customer asks follow-up questions (e.g., "any other tours?"), base your answer on Context.
-        - Use a friendly, concise tone.
-        - DO NOT use markdown formatting like **bold** or *italic* in your response.
-        - Format prices exactly as shown in the Context (with $ for USD or ₫ for VND).
+        DỮ LIỆU TOUR (Nguồn sự thật):
+        ---
+        {TOUR_CONTEXT}
+        ---
+
+        YÊU CẦU TRẢ LỜI:
+        1. Chỉ sử dụng thông tin trong phần "DỮ LIỆU TOUR". Nếu khách hỏi tour không có trong dữ liệu, hãy xin lỗi và bảo chưa có thông tin.
+        2. Giọng điệu: Thân thiện, nhiệt tình, chuyên nghiệp.
+        3. Định dạng: Trả lời ngắn gọn, rõ ràng. KHÔNG dùng markdown (không bôi đậm, không in nghiêng).
+        4. Nếu khách hỏi giá, hãy trả lời chính xác con số trong dữ liệu.
         """
-    else:
-        final_prompt = f"""
-        Bạn là trợ lý ảo JOIGO. Hãy trả lời câu hỏi dựa trên thông tin được cung cấp.
+    else: # Prompt cho Tiếng Anh
+        system_instruction = f"""
+        You are the AI assistant for JOIGO Travel.
         
-        LỊCH SỬ HỘI THOẠI:
-        {history_text}
+        YOUR MISSION:
+        Answer customer questions based STRICTLY on the tour data provided below.
         
-        THÔNG TIN DỮ LIỆU TOUR (Context):
-        {context_text}
-        
-        KHÁCH HÀNG HỎI: "{user_query}"
-        
-        YÊU CẦU:
-        - Nếu thông tin có trong Context, hãy trả lời chi tiết.
-        - Nếu khách hỏi nối tiếp (ví dụ: "còn tour nào khác?"), hãy dựa vào Context.
-        - Giọng điệu thân thiện, ngắn gọn.
-        - KHÔNG sử dụng định dạng markdown như **bold** hoặc *italic* trong câu trả lời.
-        - Format giá chính xác như trong Context (với $ cho USD hoặc ₫ cho VND).
+        TOUR DATA (Source of Truth):
+        ---
+        {TOUR_CONTEXT}
+        ---
+
+        RESPONSE REQUIREMENTS:
+        1. Only use information from the "TOUR DATA" section. If information is missing, politely say you don't have it.
+        2. Tone: Friendly, enthusiastic, professional.
+        3. Format: Plain text only. NO markdown (no bold, no italics).
+        4. Keep prices exactly as listed.
         """
+
+    # Nội dung gửi đi
+    final_prompt = f"""
+    {system_instruction}
+
+    LỊCH SỬ HỘI THOẠI TRƯỚC ĐÓ:
+    {history_text}
+
+    KHÁCH HÀNG VỪA HỎI:
+    "{user_query}"
+
+    TRẢ LỜI CỦA BẠN:
+    """
 
     try:
+        # 3. Gọi Gemini (Chỉ tốn 1 request duy nhất)
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model=MODEL_NAME,
             contents=final_prompt
         )
+        
         ai_reply = response.text
-        
         ai_reply = remove_markdown(ai_reply)
-        
-        # 6. Save chat history
+
+        # 4. Lưu lịch sử
         save_chat_history(session_id, "User", user_query)
         save_chat_history(session_id, "AI", ai_reply)
-        
+
         return {
             "response": ai_reply,
-            "rewritten_query": search_query,
-            "relevant_tours_count": len(relevant_tours)
+            "session_id": session_id
         }
-        
+
     except Exception as e:
-        print(f"Generate Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error: {e}")
+        # Xử lý trường hợp hết quota hoặc lỗi mạng
+        error_msg = "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau." if language == "VI" else "System busy, please try again."
+        return {
+            "response": error_msg,
+            "error_detail": str(e)
+        }
