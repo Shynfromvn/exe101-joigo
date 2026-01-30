@@ -1,10 +1,11 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TourCard from "@/components/TourCard";
 import FloatingContact from "@/components/FloatingContact";
+import AdminTourManager from "@/components/AdminTourManager";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { hanoiBlogs } from "@/lib/blogs";
@@ -16,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTours } from "@/contexts/TourContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { t } from "@/lib/i18n";
 
 // Helper function to check if tour has a specific type
@@ -48,10 +50,13 @@ const offerInfo: Record<
 };
 
 const AllTours = () => {
-  const { filteredTours, filters, setFilters, searchQuery, language, loading } =
+  const { filteredTours, filters, setFilters, searchQuery, language, loading, fetchTours } =
     useTours();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const offerId = searchParams.get("offer");
+  const [showAdminManager, setShowAdminManager] = useState(false);
+  const [editingTour, setEditingTour] = useState<any>(null);
 
   const offerTours = useMemo(() => {
     if (!offerId || !offerInfo[offerId]) return filteredTours;
@@ -250,12 +255,20 @@ const AllTours = () => {
                 ? `${t(language, "all_tours_for")} "${searchQuery}"`
                 : t(language, "all_all_tours")}
             </h1>
-            <p className="text-muted-foreground">
-              {offerTours.length}{" "}
-              {offerTours.length === 1
-                ? t(language, "all_found_singular")
-                : t(language, "all_found_plural")}
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-muted-foreground">
+                {offerTours.length}{" "}
+                {offerTours.length === 1
+                  ? t(language, "all_found_singular")
+                  : t(language, "all_found_plural")}
+              </p>
+              {user?.role === 'admin' && (
+                <Button onClick={() => setShowAdminManager(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {language === "VI" ? "Tạo Tour" : "Create Tour"}
+                </Button>
+              )}
+            </div>
           </div>
           {loading ? (
             <div className="text-center py-16">
@@ -389,6 +402,20 @@ const AllTours = () => {
 
       <Footer />
       <FloatingContact />
+      
+      {showAdminManager && (
+        <AdminTourManager
+          tour={editingTour}
+          mode={editingTour ? "edit" : "create"}
+          onClose={() => {
+            setShowAdminManager(false);
+            setEditingTour(null);
+          }}
+          onSuccess={() => {
+            fetchTours();
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -9,12 +9,17 @@ import {
   ArrowRight,
   ChevronRight,
   Heart,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
+import AdminTourManager from "@/components/AdminTourManager";
 import { useTours } from "@/contexts/TourContext";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,15 +29,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const TourDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { tours, currency, language } = useTours();
+  const { tours, currency, language, fetchTours } = useTours();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { user, getAccessToken } = useAuth();
+  const { toast } = useToast();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isAllPhotosOpen, setIsAllPhotosOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [showAdminManager, setShowAdminManager] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const tour = tours.find((t) => t.id === id);
   
@@ -46,6 +66,46 @@ const TourDetail = () => {
       } else {
         addToWishlist(tour);
       }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!tour) return;
+    
+    setIsDeleting(true);
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("Vui lòng đăng nhập");
+      }
+
+      const response = await fetch(`http://localhost:8000/api/tours/${tour.id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || "Lỗi khi xóa tour");
+      }
+
+      toast({
+        title: "Xóa tour thành công",
+        variant: "default",
+      });
+
+      navigate("/tours");
+    } catch (error: any) {
+      toast({
+        title: "Lỗi",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -191,7 +251,30 @@ const TourDetail = () => {
 
             {/* Title & Rating */}
             <div className="mb-6">
-              <h1 className="text-4xl font-bold mb-4">{displayTitle}</h1>
+              <div className="flex items-start justify-between mb-4">
+                <h1 className="text-4xl font-bold flex-1">{displayTitle}</h1>
+                {user?.role === 'admin' && (
+                  <div className="flex gap-2 ml-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAdminManager(true)}
+                    >
+                      <Edit2 className="w-4 h-4 mr-2" />
+                      {language === "VI" ? "Sửa" : "Edit"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {language === "VI" ? "Xóa" : "Delete"}
+                    </Button>
+                  </div>
+                )}
+              </div>
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <div className="flex">
@@ -451,6 +534,49 @@ const TourDetail = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Admin Tour Manager Dialog */}
+      {showAdminManager && (
+        <AdminTourManager
+          tour={tour}
+          mode="edit"
+          onClose={() => setShowAdminManager(false)}
+          onSuccess={() => {
+            fetchTours();
+            setShowAdminManager(false);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {language === "VI" ? "Xác nhận xóa tour" : "Confirm Delete Tour"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {language === "VI" 
+                ? "Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác."
+                : "Are you sure you want to delete this tour? This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              {language === "VI" ? "Hủy" : "Cancel"}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isDeleting 
+                ? (language === "VI" ? "Đang xóa..." : "Deleting...")
+                : (language === "VI" ? "Xóa" : "Delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

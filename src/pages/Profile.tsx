@@ -184,6 +184,22 @@ const Profile = () => {
                           </Button>
                         </div>
                       )}
+                      <div className="flex gap-2 items-start">
+                        <Label className="text-muted-foreground w-40 pt-2">
+                          {language === "VI" ? "Vai trò" : "Role"}
+                        </Label>
+                        <span className="font-medium pt-2">
+                          {user.role === 'admin' ? (
+                            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+                              {language === "VI" ? "Quản trị viên" : "Administrator"}
+                            </span>
+                          ) : (
+                            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                              {language === "VI" ? "Người dùng" : "User"}
+                            </span>
+                          )}
+                        </span>
+                      </div>
                       <div className="pt-4">
                         <Button
                           onClick={() => setIsEditing(true)}

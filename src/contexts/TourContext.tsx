@@ -38,7 +38,8 @@ interface TourContextType {
   };
   setFilters: (filters: any) => void;
   filteredTours: Tour[];
-  loading: boolean; // Thêm biến này để hiện vòng quay loading nếu cần
+  loading: boolean;
+  fetchTours: () => Promise<void>;
 }
 
 const TourContext = createContext<TourContextType | undefined>(undefined);
@@ -60,41 +61,41 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // --- 3. Gọi API từ Backend Python ---
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        setLoading(true);
-        // Gọi đến API bạn vừa viết
-        const response = await fetch("http://127.0.0.1:8000/api/tours");
-        
-        if (!response.ok) {
-          throw new Error("Không thể kết nối đến server");
-        }
-
-        const data = await response.json();
-
-        // --- 4. Quan trọng: Chuyển đổi dữ liệu ---
-        // Backend (Python) trả về: title_key, additional_info...
-        // Frontend (React) cần: titleKey, additionalInfo...
-        const formattedTours: Tour[] = data.map((item: any) => ({
-          ...item,
-          // Map các trường bị lệch tên
-          titleKey: item.title_key,
-          detailedDescription: item.detailed_description,
-          additionalInfo: item.additional_info,
-          // Đảm bảo type luôn là mảng (nếu backend trả về null thì gán mảng rỗng)
-          type: item.type || [],
-          images: item.images || []
-        }));
-
-        setTours(formattedTours);
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách tour:", error);
-      } finally {
-        setLoading(false); // Tắt trạng thái loading dù thành công hay thất bại
+  const fetchTours = async () => {
+    try {
+      setLoading(true);
+      // Gọi đến API bạn vừa viết
+      const response = await fetch("http://127.0.0.1:8000/api/tours");
+      
+      if (!response.ok) {
+        throw new Error("Không thể kết nối đến server");
       }
-    };
 
+      const data = await response.json();
+
+      // --- 4. Quan trọng: Chuyển đổi dữ liệu ---
+      // Backend (Python) trả về: title_key, additional_info...
+      // Frontend (React) cần: titleKey, additionalInfo...
+      const formattedTours: Tour[] = data.map((item: any) => ({
+        ...item,
+        // Map các trường bị lệch tên
+        titleKey: item.title_key,
+        detailedDescription: item.detailed_description,
+        additionalInfo: item.additional_info,
+        // Đảm bảo type luôn là mảng (nếu backend trả về null thì gán mảng rỗng)
+        type: item.type || [],
+        images: item.images || []
+      }));
+
+      setTours(formattedTours);
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách tour:", error);
+    } finally {
+      setLoading(false); // Tắt trạng thái loading dù thành công hay thất bại
+    }
+  };
+
+  useEffect(() => {
     fetchTours();
   }, []); // [] nghĩa là chỉ chạy 1 lần khi web vừa load
 
@@ -143,6 +144,7 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
         setFilters,
         filteredTours,
         loading,
+        fetchTours,
       }}
     >
       {children}

@@ -54,3 +54,4 @@ env/
 ENV/
 
 backend/**/__pycache__/
+build_docker.txt
