@@ -24,7 +24,8 @@ dist-ssr
 *.sw?
 
 .env
-# Python
+
+# Python cache files
 __pycache__/
 *.py[cod]
 *$py.class
