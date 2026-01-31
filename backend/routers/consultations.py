@@ -13,6 +13,7 @@ class ConsultationCreate(BaseModel):
     phone: str = Field(..., min_length=9, max_length=15)
     message: Optional[str] = None
     user_id: Optional[str] = None
+    tour_id: Optional[str] = None  # ID của tour mà người dùng muốn đặt
 
 # --- 2. API Endpoint ---
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -28,7 +29,8 @@ async def create_consultation(form_data: ConsultationCreate):
             "phone": form_data.phone,
             "message": form_data.message,
             "status": "pending", # Mặc định là chờ xử lý
-            "user_id": form_data.user_id if form_data.user_id else None
+            "user_id": form_data.user_id if form_data.user_id else None,
+            "tour_id": form_data.tour_id if form_data.tour_id else None
         }
 
         # Gọi Supabase với admin client (bypass RLS)

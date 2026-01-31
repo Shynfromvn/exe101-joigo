@@ -23,6 +23,9 @@ import { useToast } from "@/hooks/use-toast";
 import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast as sonnerToast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +42,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { QRCodeSVG } from "qrcode.react";
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -53,6 +57,16 @@ const TourDetail = () => {
   const [showAdminManager, setShowAdminManager] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Booking Modal States
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingFormData, setBookingFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
   const tour = tours.find((t) => t.id === id);
   
@@ -66,6 +80,51 @@ const TourDetail = () => {
       } else {
         addToWishlist(tour);
       }
+    }
+  };
+
+  // Handle Booking Form Submit
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingBooking(true);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/consultations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name: bookingFormData.name,
+          email: bookingFormData.email,
+          phone: bookingFormData.phone,
+          message: bookingFormData.message || null,
+          user_id: user?.id || null,
+          tour_id: tour?.id || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to submit booking");
+      }
+
+      sonnerToast.success(
+        language === "VI" 
+          ? "Đặt tour thành công! Chúng tôi sẽ liên hệ sớm."
+          : "Booking submitted! We will contact you soon."
+      );
+      setBookingFormData({ name: "", email: "", phone: "", message: "" });
+      setShowBookingModal(false);
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      sonnerToast.error(
+        language === "VI"
+          ? "Có lỗi xảy ra. Vui lòng thử lại."
+          : "An error occurred. Please try again."
+      );
+    } finally {
+      setIsSubmittingBooking(false);
     }
   };
 
@@ -347,7 +406,11 @@ const TourDetail = () => {
                 </p>
               </div>
 
-              <Button className="w-full mb-4" size="lg">
+              <Button 
+                className="w-full mb-4" 
+                size="lg"
+                onClick={() => setShowBookingModal(true)}
+              >
                 {t(language, "td_book_now")}
               </Button>
 
@@ -534,6 +597,133 @@ const TourDetail = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Booking Modal */}
+      <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              {language === "VI" ? "Đặt Tour Ngay" : "Book Your Tour Now"}
+            </DialogTitle>
+            <p className="text-muted-foreground text-sm mt-1">
+              {language === "VI" 
+                ? "Để lại thông tin liên hệ, chúng tôi sẽ hỗ trợ bạn lên kế hoạch chuyến đi hoàn hảo"
+                : "Leave your contact information and we'll help you plan your perfect adventure"}
+            </p>
+          </DialogHeader>
+          
+          <div className="grid md:grid-cols-[1fr,auto] gap-6">
+            {/* Left side - Form */}
+            <div>
+              {/* Tour Info Summary */}
+              <div className="bg-secondary/50 rounded-lg p-4 mb-4">
+                <p className="font-semibold text-sm mb-1">
+                  {language === "VI" ? "Tour đã chọn:" : "Selected Tour:"}
+                </p>
+                <p className="text-primary font-medium">{displayTitle}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {language === "VI" ? "Giá:" : "Price:"} {formattedPrice}/{language === "VI" ? "người" : "person"}
+                </p>
+              </div>
+
+              <form onSubmit={handleBookingSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === "VI" ? "Họ và tên" : "Full Name"} *
+              </label>
+              <Input
+                type="text"
+                placeholder={language === "VI" ? "Nhập họ và tên" : "Enter your full name"}
+                value={bookingFormData.name}
+                onChange={(e) =>
+                  setBookingFormData({ ...bookingFormData, name: e.target.value })
+                }
+                required
+                className="h-11"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Email *
+                </label>
+                <Input
+                  type="email"
+                  placeholder={language === "VI" ? "email@example.com" : "email@example.com"}
+                  value={bookingFormData.email}
+                  onChange={(e) =>
+                    setBookingFormData({ ...bookingFormData, email: e.target.value })
+                  }
+                  required
+                  className="h-11"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "VI" ? "Số điện thoại" : "Phone"} *
+                </label>
+                <Input
+                  type="tel"
+                  placeholder={language === "VI" ? "0123456789" : "0123456789"}
+                  value={bookingFormData.phone}
+                  onChange={(e) =>
+                    setBookingFormData({ ...bookingFormData, phone: e.target.value })
+                  }
+                  required
+                  className="h-11"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === "VI" ? "Ghi chú (tùy chọn)" : "Message (optional)"}
+              </label>
+              <Textarea
+                placeholder={language === "VI" 
+                  ? "Nhập yêu cầu đặc biệt, số người tham gia, ngày khởi hành mong muốn..." 
+                  : "Enter special requests, number of participants, preferred departure date..."}
+                value={bookingFormData.message}
+                onChange={(e) =>
+                  setBookingFormData({ ...bookingFormData, message: e.target.value })
+                }
+                className="min-h-24 resize-none"
+              />
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              size="lg"
+              disabled={isSubmittingBooking}
+            >
+              {isSubmittingBooking
+                ? (language === "VI" ? "Đang gửi..." : "Submitting...")
+                : (language === "VI" ? "Gửi yêu cầu đặt tour" : "Submit Booking Request")}
+            </Button>
+              </form>
+            </div>
+
+            {/* Right side - QR Code */}
+            <div className="flex flex-col items-center justify-center md:border-l md:pl-6">
+              <div className="bg-white rounded-xl p-4 shadow-sm border">
+                <QRCodeSVG
+                  value="https://zalo.me/0971769862"
+                  size={150}
+                  level="H"
+                  includeMargin={false}
+                  fgColor="#000000"
+                  bgColor="#ffffff"
+                />
+              </div>
+              <p className="text-center text-sm font-medium text-muted-foreground mt-3 max-w-[150px]">
+                {language === "VI" 
+                  ? "Quét mã QR để nhắn tin trực tiếp với nhân viên" 
+                  : "Scan QR to chat directly with our staff"}
+              </p>
+              <p className="text-xs text-primary mt-1 font-medium">Zalo</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
