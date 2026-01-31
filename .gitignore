@@ -55,3 +55,6 @@ ENV/
 
 backend/**/__pycache__/
 build_docker.txt
+backend/routers/__pycache__/
+backend/core/__pycache__/
+backend/__pycache__/

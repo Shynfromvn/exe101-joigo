@@ -295,7 +295,7 @@ const AllTours = () => {
 
         {/* Customer Reviews */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">Customer Reviews</h2>
+          <h2 className="text-3xl font-bold mb-8">{t(language, "all_customer_reviews")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {reviews.map((review, index) => (
               <div
