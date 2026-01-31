@@ -10,7 +10,7 @@ class TourBase(BaseModel):
     title: str
     title_key: Optional[str] = None
     image: Optional[str] = None
-    images: Optional[List[str]] = [] # Mapping cột text[] trong DB
+    images: Optional[List[str]] = []    # Mapping cột text[] trong DB
     price: Optional[float] = 0
     rating: Optional[float] = 0
     reviews: Optional[int] = 0
@@ -21,14 +21,10 @@ class TourBase(BaseModel):
     transportation: Optional[str] = None # Phương tiện
     type: Optional[List[str]] = []      # Loại hình (VD: ["Văn hóa", "Ẩm thực"])
 
-    # Nội dung chi tiết
+    # Nội dung chi tiết (khớp với database schema)
     description: Optional[str] = None
-    detailed_description: Optional[str] = None
-    introduction: Optional[str] = None
-    itinerary: Optional[str] = None      # Lịch trình chi tiết
-    regulations: Optional[str] = None    # Quy định
     additional_info: Optional[str] = None
-    description_en: Optional[str] = None # Mô tả tiếng Anh
+    description_en: Optional[str] = None
 
 class TourCreate(TourBase):
     # ID là text, optional vì nếu user không gửi thì backend sẽ tự tạo

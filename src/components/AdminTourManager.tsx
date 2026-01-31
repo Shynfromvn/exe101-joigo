@@ -28,8 +28,18 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
   const { getAccessToken } = useAuth();
   const { language } = useTours();
   const [loading, setLoading] = useState(false);
+  
+  // State riêng cho images và type text input
+  const [imagesText, setImagesText] = useState(
+    tour?.images?.join("\n") || ""
+  );
+  const [typeText, setTypeText] = useState(
+    Array.isArray(tour?.type) ? tour.type.join(", ") : tour?.type || ""
+  );
+  
   const [formData, setFormData] = useState({
     title: tour?.title || "",
+    title_key: tour?.title_key || "",
     image: tour?.image || "",
     images: tour?.images || [],
     price: tour?.price || 0,
@@ -40,11 +50,8 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
     transportation: tour?.transportation || "",
     type: (Array.isArray(tour?.type) ? tour.type : tour?.type ? [tour.type] : []) as string[],
     description: tour?.description || "",
-    detailedDescription: tour?.detailedDescription || "",
-    introduction: tour?.introduction || "",
-    itinerary: tour?.itinerary || "",
-    regulations: tour?.regulations || "",
-    additionalInfo: tour?.additionalInfo || "",
+    additional_info: tour?.additional_info || "",
+    description_en: tour?.description_en || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,6 +63,23 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
       if (!token) {
         throw new Error("Vui lòng đăng nhập");
       }
+
+      // Parse images và type từ text thành array
+      const imagesArray = imagesText
+        .split(/[\n,]+/)
+        .map(url => url.trim())
+        .filter(url => url !== "");
+      
+      const typeArray = typeText
+        .split(",")
+        .map(t => t.trim())
+        .filter(t => t !== "");
+
+      const dataToSubmit = {
+        ...formData,
+        images: imagesArray,
+        type: typeArray,
+      };
 
       const url = mode === "create" 
         ? "http://localhost:8000/api/tours" 
@@ -69,7 +93,7 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSubmit),
       });
 
       if (!response.ok) {
@@ -95,15 +119,7 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
     }
   };
 
-  const handleImagesChange = (value: string) => {
-    const imagesArray = value.split("\n").filter(url => url.trim() !== "");
-    setFormData({ ...formData, images: imagesArray });
-  };
 
-  const handleTypeChange = (value: string) => {
-    const typeArray = value.split(",").map(t => t.trim()).filter(t => t !== "");
-    setFormData({ ...formData, type: typeArray });
-  };
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -129,6 +145,16 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
               />
             </div>
 
+            <div className="col-span-2">
+              <Label htmlFor="title_key">Khóa tiêu đề (title_key)</Label>
+              <Input
+                id="title_key"
+                value={formData.title_key}
+                onChange={(e) => setFormData({ ...formData, title_key: e.target.value })}
+                placeholder="key-for-translation"
+              />
+            </div>
+
             <div>
               <Label htmlFor="image">Ảnh đại diện (URL)</Label>
               <Input
@@ -146,6 +172,30 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
                 type="number"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="rating">Đánh giá (0-5)</Label>
+              <Input
+                id="rating"
+                type="number"
+                step="0.1"
+                min="0"
+                max="5"
+                value={formData.rating}
+                onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="reviews">Số lượt đánh giá</Label>
+              <Input
+                id="reviews"
+                type="number"
+                min="0"
+                value={formData.reviews}
+                onChange={(e) => setFormData({ ...formData, reviews: parseInt(e.target.value) })}
               />
             </div>
 
@@ -181,8 +231,8 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
               <Label htmlFor="type">Loại hình (ngăn cách bởi dấu phẩy)</Label>
               <Input
                 id="type"
-                value={formData.type?.join(", ")}
-                onChange={(e) => handleTypeChange(e.target.value)}
+                value={typeText}
+                onChange={(e) => setTypeText(e.target.value)}
                 placeholder="Văn hóa, Ẩm thực, Nghỉ dưỡng"
               />
             </div>
@@ -190,64 +240,36 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
 
           {/* Images */}
           <div>
-            <Label htmlFor="images">Ảnh phụ (mỗi URL một dòng)</Label>
+            <Label htmlFor="images">Ảnh phụ (mỗi URL một dòng hoặc cách nhau bởi dấu phẩy)</Label>
             <Textarea
               id="images"
-              value={formData.images?.join("\n")}
-              onChange={(e) => handleImagesChange(e.target.value)}
-              placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+              value={imagesText}
+              onChange={(e) => setImagesText(e.target.value)}
+              placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;hoặc&#10;https://example.com/image1.jpg, https://example.com/image2.jpg"
               rows={3}
             />
           </div>
 
           {/* Descriptions */}
           <div>
-            <Label htmlFor="description">Mô tả ngắn</Label>
+            <Label htmlFor="description">Mô tả (Tiếng Việt)</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="introduction">Giới thiệu</Label>
-            <Textarea
-              id="introduction"
-              value={formData.introduction}
-              onChange={(e) => setFormData({ ...formData, introduction: e.target.value })}
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="detailed_description">Mô tả chi tiết</Label>
-            <Textarea
-              id="detailed_description"
-              value={formData.detailedDescription}
-              onChange={(e) => setFormData({ ...formData, detailedDescription: e.target.value })}
               rows={4}
+              placeholder="Nhập mô tả tour bằng tiếng Việt..."
             />
           </div>
 
           <div>
-            <Label htmlFor="itinerary">Lịch trình</Label>
+            <Label htmlFor="description_en">Mô tả (Tiếng Anh)</Label>
             <Textarea
-              id="itinerary"
-              value={formData.itinerary}
-              onChange={(e) => setFormData({ ...formData, itinerary: e.target.value })}
+              id="description_en"
+              value={formData.description_en}
+              onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
               rows={4}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="regulations">Quy định</Label>
-            <Textarea
-              id="regulations"
-              value={formData.regulations}
-              onChange={(e) => setFormData({ ...formData, regulations: e.target.value })}
-              rows={3}
+              placeholder="Enter tour description in English..."
             />
           </div>
 
@@ -255,9 +277,10 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
             <Label htmlFor="additional_info">Thông tin bổ sung</Label>
             <Textarea
               id="additional_info"
-              value={formData.additionalInfo}
-              onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
-              rows={2}
+              value={formData.additional_info}
+              onChange={(e) => setFormData({ ...formData, additional_info: e.target.value })}
+              rows={3}
+              placeholder="Các thông tin bổ sung về tour (lịch trình, quy định, ghi chú...)"
             />
           </div>
 
