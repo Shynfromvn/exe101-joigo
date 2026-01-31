@@ -1,25 +1,23 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-// --- 1. Giữ nguyên Interface (Cấu trúc dữ liệu) ---
+// --- 1. Tour Interface (Khớp với Database Schema) ---
 export interface Tour {
   id: string;
-  image: string;
-  images?: string[];
   title: string;
-  titleKey?: string;
+  title_key?: string;
+  image?: string;
+  images?: string[];
   rating: number;
   reviews: number;
   price: number;
   type: string | string[];
-  departure: string;
-  destination: string;
-  transportation: string;
-  description: string;
-  detailedDescription?: string;
-  introduction?: string;
-  itinerary?: string;
-  regulations?: string;
-  additionalInfo?: string;
+  departure?: string;
+  destination?: string;
+  transportation?: string;
+  description?: string;
+  additional_info?: string;
+  created_at?: string;
+  description_en?: string;
 }
 
 interface TourContextType {

@@ -160,8 +160,8 @@ const TourDetail = () => {
       ? `${(tour.price * 23000).toLocaleString()}₫`
       : `$${tour.price}`;
 
-  const displayTitle = tour.titleKey
-    ? t(language, tour.titleKey as any)
+  const displayTitle = tour.title_key
+    ? t(language, tour.title_key as any)
     : tour.title;
 
   return (
@@ -303,74 +303,31 @@ const TourDetail = () => {
                 {t(language, "td_about_tour")}
               </h2>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {tour.detailedDescription || tour.description}
+                {tour.description || "Thông tin tour sẽ được cập nhật sớm."}
               </p>
             </Card>
 
-            {/* Journey Details - 3 sections */}
-            {(tour.introduction || tour.itinerary || tour.regulations) && (
+            {/* Additional Info - Thông tin bổ sung */}
+            {tour.additional_info && (
               <Card className="p-6 mb-6">
                 <h2 className="text-2xl font-bold mb-6">
-                  Về journey
+                  {t(language, "td_tour_details")}
                 </h2>
-                
-                {/* Giới thiệu */}
-                {tour.introduction && (
-                  <div className="mb-6 pb-6 border-b border-border last:border-b-0 last:mb-0 last:pb-0">
-                    <h3 className="text-xl font-semibold mb-3 text-primary">
-                      Giới thiệu
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {tour.introduction}
-                    </p>
-                  </div>
-                )}
-
-                {/* Lịch trình */}
-                {tour.itinerary && (
-                  <div className="mb-6 pb-6 border-b border-border last:border-b-0 last:mb-0 last:pb-0">
-                    <h3 className="text-xl font-semibold mb-3 text-primary">
-                      Lịch trình
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {tour.itinerary}
-                    </p>
-                  </div>
-                )}
-
-                {/* Quy định */}
-                {tour.regulations && (
-                  <div className="mb-6 pb-6 border-b border-border last:border-b-0 last:mb-0 last:pb-0">
-                    <h3 className="text-xl font-semibold mb-3 text-primary">
-                      Quy định
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {tour.regulations}
-                    </p>
-                  </div>
-                )}
+                <div 
+                  className="text-muted-foreground leading-relaxed whitespace-pre-line prose prose-sm max-w-none
+                    [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mb-3 [&_h3]:mt-4
+                    [&_h4]:text-base [&_h4]:font-semibold [&_h4]:text-foreground [&_h4]:mb-2 [&_h4]:mt-3
+                    [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-2 [&_ul]:my-3
+                    [&_li]:text-muted-foreground
+                    [&_p]:my-2
+                    [&_hr]:my-6 [&_hr]:border-border
+                    [&_b]:font-semibold [&_b]:text-foreground"
+                  dangerouslySetInnerHTML={{ 
+                    __html: tour.additional_info
+                  }}
+                />
               </Card>
             )}
-
-            {/* Tour Details */}
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-6">
-                {t(language, "td_tour_details")}
-              </h2>
-              <div 
-                className="text-muted-foreground leading-relaxed whitespace-pre-line prose prose-sm max-w-none
-                  [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mb-3 [&_h3]:mt-4
-                  [&_h4]:text-base [&_h4]:font-semibold [&_h4]:text-foreground [&_h4]:mb-2 [&_h4]:mt-3
-                  [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-2 [&_ul]:my-3
-                  [&_li]:text-muted-foreground
-                  [&_p]:my-2
-                  [&_hr]:my-6 [&_hr]:border-border
-                  [&_b]:font-semibold [&_b]:text-foreground"
-                dangerouslySetInnerHTML={{ 
-                  __html: tour.additionalInfo || "Đây là một địa điểm thú vị với nhiều trải nghiệm độc đáo. Tour sẽ đưa bạn khám phá những nét đẹp văn hóa và lịch sử đặc sắc của địa phương."
-                }}
-              />
-            </Card>
           </div>
 
           {/* Sidebar - Booking Card */}
