@@ -5,3 +5,4 @@ uvicorn
 supabase
 pydantic
 google-genai
+email-validator

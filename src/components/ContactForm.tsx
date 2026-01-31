@@ -4,23 +4,56 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useTours } from "@/contexts/TourContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { t } from "@/lib/i18n";
 import { QRCodeSVG } from "qrcode.react";
 import vanMieu from "@/assets/van-mieu.jpg";
 
+const API_BASE_URL = "http://127.0.0.1:8000";
+
 const ContactForm = () => {
   const { language } = useTours();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(t(language, "contact_success"));
-    setFormData({ name: "", email: "", phone: "", message: "" });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/consultations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message || null,
+          user_id: user?.id || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to submit consultation");
+      }
+
+      toast.success(t(language, "contact_success"));
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      console.error("Error submitting consultation:", error);
+      toast.error(t(language, "contact_error"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // QR Code content - có thể là link Zalo, Facebook, hoặc website
@@ -116,8 +149,11 @@ const ContactForm = () => {
                 variant={"hero"} 
                 size={"lg"} 
                 className="w-full"
+                disabled={isSubmitting}
               >
-                {t(language, "contact_submit")}
+                {isSubmitting
+                  ? t(language, "contact_submitting")
+                  : t(language, "contact_submit")}
               </Button>
             </form>
           </div>
