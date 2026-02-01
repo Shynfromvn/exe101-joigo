@@ -12,6 +12,7 @@ class TourBase(BaseModel):
     image: Optional[str] = None
     images: Optional[List[str]] = []    # Mapping cột text[] trong DB
     price: Optional[float] = 0
+    price_vnd: Optional[float] = None
     rating: Optional[float] = 0
     reviews: Optional[int] = 0
     

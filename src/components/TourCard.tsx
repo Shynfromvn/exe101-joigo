@@ -12,6 +12,7 @@ interface TourCardProps {
   rating: number;
   reviews: number;
   price: number;
+  price_vnd?: number;
 }
 
 const TourCard = ({
@@ -22,11 +23,14 @@ const TourCard = ({
   rating,
   reviews,
   price,
+  price_vnd,
 }: TourCardProps) => {
   const { currency, language } = useTours();
   const navigate = useNavigate();
   const formattedPrice =
-    currency === "VND" ? `${(price * 26000).toLocaleString()}₫` : `$${price}`;
+    currency === "VND" 
+      ? `${(price_vnd || price * 26000).toLocaleString()}₫` 
+      : `$${price}`;
 
   // Chọn title_en khi language là EN, ngược lại dùng title (VI)
   const displayTitle = language === "EN" && title_en ? title_en : title;

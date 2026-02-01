@@ -23,11 +23,12 @@ interface FrameConfig {
   | "photo_frame_frame_vintage"
   | "photo_frame_frame_bold"
   | "photo_frame_frame_ornamental"
-  | "photo_frame_demo"
+  | "photo_frame_simple"
   | "photo_frame_frame_floral"
-  | "photo_frame_happy_new_year_1"
+  | "photo_frame_banh_keo"
   | "photo_frame_banh_keo_1"
-  | "photo_frame_happy_new_year_2";
+  | "photo_frame_cung_hy_phat_tai"
+  | "photo_frame_vui_tet_2026";
   borderWidth: number;
   borderColor: string;
   borderRadius: number;
@@ -121,26 +122,26 @@ const frameConfigs: FrameConfig[] = [
     svgPath: "/frames/floral-frame.svg",
   },
   {
-    id: "demo",
-    nameKey: "photo_frame_demo",
+    id: "simple",
+    nameKey: "photo_frame_simple",
     borderWidth: 0,
     borderColor: "transparent",
     borderRadius: 0,
     padding: 50,
     shadow: false,
     style: "svg",
-    svgPath: "/frames/demo.svg",
+    svgPath: "/frames/simple.svg",
   },
   {
-    id: "happy_new_year_1",
-    nameKey: "photo_frame_happy_new_year_1",
+    id: "banh_keo",
+    nameKey: "photo_frame_banh_keo",
     borderWidth: 0,
     borderColor: "transparent",
     borderRadius: 0,
     padding: 50,
     shadow: false,
     style: "svg",
-    svgPath: "/frames/happy_new_year_1.svg",
+    svgPath: "/frames/banh_keo.svg",
   },
   {
     id: "banh_keo_1",
@@ -154,15 +155,26 @@ const frameConfigs: FrameConfig[] = [
     svgPath: "/frames/banh_keo_1.svg",
   },
   {
-    id: "happy_new_year_2",
-    nameKey: "photo_frame_happy_new_year_2",
+    id: "cung_hy_phat_tai",
+    nameKey: "photo_frame_cung_hy_phat_tai",
     borderWidth: 0,
     borderColor: "transparent",
     borderRadius: 0,
     padding: 50,
     shadow: false,
     style: "svg",
-    svgPath: "/frames/happy_new_year_2.svg",
+    svgPath: "/frames/cung_hy_phat_tai.svg",
+  },
+  {
+    id: "vui_tet_2026",
+    nameKey: "photo_frame_vui_tet_2026",
+    borderWidth: 0,
+    borderColor: "transparent",
+    borderRadius: 0,
+    padding: 50,
+    shadow: false,
+    style: "svg",
+    svgPath: "/frames/vui_tet_2026.svg",
   }
 ];
 

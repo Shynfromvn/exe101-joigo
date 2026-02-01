@@ -172,6 +172,10 @@ const dictionary: Dictionary = {
     EN: "Thach That Tour, Vietnam",
     VI: "Tour Thạch Thất, Việt Nam",
   },
+  idx_landmark_van_mieu: {
+    EN: "Temple of Literature, Vietnam",
+    VI: "Văn Miếu - Quốc Tử Giám, Việt Nam",
+  },
 
   // AllTours page
   all_home: { EN: "Home", VI: "Trang chủ" },
@@ -365,8 +369,8 @@ const dictionary: Dictionary = {
 
   // Index page additional
   idx_travel_blog: {
-    EN: "Câu chuyện của Joigo",
-    VI: "Joigo's story",
+    EN: "Joigo's story",
+    VI: "Câu chuyện của Joigo",
   },
   idx_blog_desc: {
     EN: "Blog stories, guides, and feedback",
@@ -587,21 +591,25 @@ const dictionary: Dictionary = {
     EN: "Floral Frame",
     VI: "Khung Hoa",
   },
-  photo_frame_demo: {
-    EN: "Demo Frame",
-    VI: "Khung Demo",
+  photo_frame_simple: {
+    EN: "Simple Frame",
+    VI: "Khung Đơn Giản",
   },
-  photo_frame_happy_new_year_1: {
-    EN: "Happy New Year 1",
-    VI: "Chúc Mừng Năm Mới 1",
-  },
-  photo_frame_banh_keo_1: {
+  photo_frame_banh_keo: {
     EN: "Candy Frame",
     VI: "Khung Bánh Kẹo",
   },
-  photo_frame_happy_new_year_2: {
-    EN: "Happy New Year 2",
-    VI: "Chúc Mừng Năm Mới 2",
+  photo_frame_banh_keo_1: {
+    EN: "Candy Frame 1",
+    VI: "Khung Bánh Kẹo 1",
+  },
+  photo_frame_cung_hy_phat_tai: {
+    EN: "Prosperity Frame",
+    VI: "Khung Cung Hỷ Phát Tài",
+  },
+  photo_frame_vui_tet_2026: {
+    EN: "Happy Tet 2026",
+    VI: "Vui Tết 2026",
   },
 
   // About Us Page

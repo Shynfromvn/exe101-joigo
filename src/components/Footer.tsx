@@ -80,31 +80,41 @@ const Footer = () => {
             </h3>
             <div className="space-y-3">
               <a
-                href="#"
+                href="https://zalo.me/0984698782"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_register_supplier")}
               </a>
               <a
-                href="#"
+                href="https://zalo.me/0984698782"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_technology_partner")}
               </a>
               <a
-                href="#"
+                href="https://zalo.me/0984698782"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_affiliate_partner")}
               </a>
               <a
-                href="#"
+                href="https://zalo.me/0984698782"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_agent_program")}
               </a>
               <a
-                href="#"
+                href="https://zalo.me/0984698782"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_partner_with_joigo")}

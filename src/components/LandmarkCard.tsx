@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { useTours } from "@/contexts/TourContext";
-import { t } from "@/lib/i18n";
 
 interface LandmarkCardProps {
   image: string;
   name: string;
-  nameKey?: string;
+  name_en?: string; // Optional English name
   destination: string;
   tourId?: string; // Optional tour ID to navigate to specific tour detail
 }
@@ -14,12 +13,15 @@ interface LandmarkCardProps {
 const LandmarkCard = ({
   image,
   name,
-  nameKey,
+  name_en,
   destination,
   tourId,
 }: LandmarkCardProps) => {
   const navigate = useNavigate();
   const { language } = useTours();
+  
+  // Chọn name_en khi language là EN, ngược lại dùng name (VI)
+  const displayName = language === "EN" && name_en ? name_en : name;
 
   const handleClick = () => {
     if (tourId) {
@@ -49,7 +51,7 @@ const LandmarkCard = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <h3 className="text-white text-2xl font-bold group-hover:scale-105 transition-transform">
-            {nameKey ? t(language, nameKey as any) : name}
+            {displayName}
           </h3>
         </div>
       </div>

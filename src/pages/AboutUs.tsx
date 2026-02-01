@@ -10,7 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const AboutUs = () => {
-  const { language } = useTours();
+  const { language, tours } = useTours();
+  
+  // Featured tours: Văn Miếu (ID: 1), Làng lụa Vạn Phúc (ID: 2), Làng mây tre Phú Vinh (ID: 3), Thung lũng Bản xôi (ID: 5)
+  const featuredTourIds = ["1", "2", "3", "5"];
+  const featuredTours = featuredTourIds
+    .map((id) => tours.find((tour) => tour.id === id))
+    .filter((tour) => tour !== undefined);
 
   return (
     <div className="min-h-screen bg-background">
@@ -200,56 +206,47 @@ const AboutUs = () => {
           </ScrollAnimation>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                titleKey: "about_tour_1_title",
-                descKey: "about_tour_1_desc",
-                image: "https://res.cloudinary.com/dczdnu2ba/image/upload/v1768056781/van-mieu.jpg",
-              },
-              {
-                titleKey: "about_tour_2_title",
-                descKey: "about_tour_2_desc",
-                image: "https://res.cloudinary.com/dczdnu2ba/image/upload/v1768056738/lang-lua-van-phuc.jpeg",
-              },
-              {
-                titleKey: "about_tour_3_title",
-                descKey: "about_tour_3_desc",
-                image: "https://res.cloudinary.com/dczdnu2ba/image/upload/v1768056742/lang-nghe-may-tre-dan-phu-vinh.jpg",
-              },
-              {
-                titleKey: "about_tour_4_title",
-                descKey: "about_tour_4_desc",
-                image: "https://res.cloudinary.com/dczdnu2ba/image/upload/v1768056762/thung-lung-ban-xoi.jpg",
-              },
-            ].map((tour, index) => (
-              <ScrollAnimation
-                key={index}
-                direction="up"
-                threshold={0.15}
-                stagger={true}
-                staggerIndex={index}
-              >
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video overflow-hidden">
-                    <img
-                      src={tour.image}
-                      alt={t(language, tour.titleKey)}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="text-lg">
-                      {t(language, tour.titleKey)}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {t(language, tour.descKey)}
-                    </p>
-                  </CardContent>
-                </Card>
-              </ScrollAnimation>
-            ))}
+            {featuredTours.map((tour, index) => {
+              // Chọn title và description theo ngôn ngữ
+              const displayTitle = language === "EN" && tour.title_en ? tour.title_en : tour.title;
+              const displayDescription = language === "EN" && tour.description_en 
+                ? tour.description_en.substring(0, 150) + (tour.description_en.length > 150 ? "..." : "")
+                : tour.description 
+                ? tour.description.substring(0, 150) + (tour.description.length > 150 ? "..." : "")
+                : "";
+              
+              return (
+                <ScrollAnimation
+                  key={tour.id}
+                  direction="up"
+                  threshold={0.15}
+                  stagger={true}
+                  staggerIndex={index}
+                >
+                  <Link to={`/tours/${tour.id}`}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={tour.image || tour.images?.[0] || ""}
+                          alt={displayTitle}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <CardHeader>
+                        <CardTitle className="text-lg">
+                          {displayTitle}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground line-clamp-3">
+                          {displayDescription}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </ScrollAnimation>
+              );
+            })}
           </div>
         </section>
 
