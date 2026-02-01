@@ -82,9 +82,10 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
         type: typeArray,
       };
 
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
       const url = mode === "create" 
-        ? "http://localhost:8000/api/tours" 
-        : `http://localhost:8000/api/tours/${tour?.id}`;
+        ? `${API_BASE_URL}/api/tours` 
+        : `${API_BASE_URL}/api/tours/${tour?.id}`;
       
       const method = mode === "create" ? "POST" : "PUT";
 

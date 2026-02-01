@@ -64,7 +64,8 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       // Gọi đến API bạn vừa viết
-      const response = await fetch("http://127.0.0.1:8000/api/tours");
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${API_BASE_URL}/api/tours`);
       
       if (!response.ok) {
         throw new Error("Không thể kết nối đến server");
