@@ -34,9 +34,6 @@ import { useTours } from "@/contexts/TourContext";
 import { t } from "@/lib/i18n.ts";
 import { hanoiBlogs } from "@/lib/blogs.ts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import langnonchuong from "@/assets/lang-non-chuong.webp";
-import thunglungbanxoi from "@/assets/thung-lung-ban-xoi.jpg";
-import tourThachThat from "@/assets/tour-thach-that.jpg";
 
 const Index = () => {
   const [heroSearch, setHeroSearch] = useState("");
@@ -62,29 +59,22 @@ const Index = () => {
     "Tour chill thu Hà Nội",
   ];
 
-  const landmarks = [
-    {
-      image: langnonchuong,
-      name: "Lang Non Chuong, Vietnam",
-      nameKey: "idx_landmark_lang_non_chuong" as const,
-      destination: "vietnam",
-      tourId: "4", // Tour ID for "Trải nghiệm làng nón Chuông"
-    },
-    {
-      image: thunglungbanxoi,
-      name: "Thung Lũng Bản Xôi, Vietnam",
-      nameKey: "idx_landmark_thung_lung_ban_xoi" as const,
-      destination: "vietnam",
-      tourId: "5", // Tour ID for "Trải nghiệm Thung lung Bản xôi"
-    },
-    {
-      image: tourThachThat,
-      name: "Tour Thạch Thất, Vietnam",
-      nameKey: "idx_landmark_tour_thach_that" as const,
-      destination: "vietnam",
-      tourId: "7", // Tour ID for "Hơi thở Xứ Đoài"
-    },
-  ];
+  // Landmarks: Get data from tours in database
+  const landmarkTourIds = ["4", "5", "7", "1"]; // Tour IDs: Làng nón Chuông, Thung lũng Bản xôi, Thạch Thất, Văn Miếu
+  const landmarks = landmarkTourIds
+    .map((id) => {
+      const tour = tours.find((tour) => tour.id === id);
+      if (!tour) return null;
+      
+      return {
+        image: tour.image || "",
+        name: tour.title || "",
+        name_en: tour.title_en || undefined,
+        destination: tour.destination || "vietnam",
+        tourId: id,
+      };
+    })
+    .filter((landmark): landmark is NonNullable<typeof landmark> => landmark !== null);
 
   const offers = [
     {
@@ -478,7 +468,7 @@ const Index = () => {
               </p>
             </div>
           </ScrollAnimation>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {landmarks.map((landmark, index) => (
               <ScrollAnimation
                 key={index}

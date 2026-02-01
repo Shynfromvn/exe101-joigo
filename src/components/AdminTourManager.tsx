@@ -43,6 +43,7 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
     image: tour?.image || "",
     images: tour?.images || [],
     price: tour?.price || 0,
+    price_vnd: tour?.price_vnd || 0,
     rating: tour?.rating || 0,
     reviews: tour?.reviews || 0,
     departure: tour?.departure || "",
@@ -168,12 +169,23 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
             </div>
 
             <div>
-              <Label htmlFor="price">Giá (VNĐ)</Label>
+              <Label htmlFor="price">Giá (USD)</Label>
               <Input
                 id="price"
                 type="number"
+                step="0.01"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="price_vnd">Giá (VNĐ)</Label>
+              <Input
+                id="price_vnd"
+                type="number"
+                value={formData.price_vnd}
+                onChange={(e) => setFormData({ ...formData, price_vnd: parseFloat(e.target.value) || 0 })}
               />
             </div>
 

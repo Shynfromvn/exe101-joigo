@@ -242,7 +242,7 @@ async def get_all_bookings(
     try:
         # Lấy bookings với tours (không JOIN profiles vì không có FK trực tiếp)
         query = supabase_admin.table("bookings")\
-            .select("*, tours(title, title_en, image, price, departure, destination)")
+            .select("*, tours(title, title_en, image, price, price_vnd, departure, destination)")
         
         if status_filter:
             query = query.eq("status", status_filter)

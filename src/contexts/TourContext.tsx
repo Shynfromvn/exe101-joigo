@@ -10,6 +10,7 @@ export interface Tour {
   rating: number;
   reviews: number;
   price: number;
+  price_vnd?: number;
   type: string | string[];
   departure?: string;
   destination?: string;

@@ -227,7 +227,7 @@ const TourDetail = () => {
 
   const formattedPrice =
     currency === "VND"
-      ? `${(tour.price * 26000).toLocaleString()}₫`
+      ? `${(tour.price_vnd || tour.price * 26000).toLocaleString()}₫`
       : `$${tour.price}`;
 
   // Chọn title_en khi language là EN, ngược lại dùng title (VI)

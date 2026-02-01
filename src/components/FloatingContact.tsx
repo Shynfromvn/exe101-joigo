@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageCircle, X, Bot, Send, Users, Landmark, Lightbulb } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTours } from "@/contexts/TourContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Message {
   id: string;
@@ -22,37 +23,81 @@ const FloatingContact = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const { language } = useTours();
+  const { getAccessToken, user } = useAuth();
 
   // ===== CHAT STATE =====
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content:
-        language === "EN"
-          ? "Hello! 👋 How can I help you with cultural tours in Hanoi?"
-          : "Xin chào! 👋 Tôi có thể giúp gì cho bạn về các tour du lịch văn hóa tại Hà Nội?",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(1);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Zalo & Messenger config
   const zaloPhone = "0984698782";
   const facebookPageId = "61586357533830";
 
-  const getOrCreateSessionId = (): string => {
-    const stored = localStorage.getItem("floating_chat_session_id");
-    if (stored) return stored;
-    const newSessionId = `floating_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem("floating_chat_session_id", newSessionId);
-    return newSessionId;
+  // Lấy authorization header
+  const getAuthHeaders = () => {
+    const token = getAccessToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
   };
 
-  const [sessionId] = useState<string>(getOrCreateSessionId());
+  // Load chat history từ database
+  const loadChatHistory = useCallback(async (sessionIdToLoad: string) => {
+    if (!sessionIdToLoad) return;
+    
+    try {
+      setIsLoadingHistory(true);
+      const response = await fetch(`${API_BASE_URL}/api/chat/sessions/${sessionIdToLoad}/messages`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.messages && data.messages.length > 0) {
+          const loadedMessages: Message[] = data.messages.map((msg: any) => ({
+            id: msg.id,
+            role: msg.role as "user" | "assistant",
+            content: msg.content,
+            timestamp: new Date(msg.created_at),
+          }));
+          setMessages(loadedMessages);
+        } else {
+          // Nếu không có tin nhắn, hiển thị welcome message
+          setMessages([{
+            id: "welcome",
+            role: "assistant",
+            content: language === "EN"
+              ? "Hello! 👋 How can I help you with cultural tours in Hanoi?"
+              : "Xin chào! 👋 Tôi có thể giúp gì cho bạn về các tour du lịch văn hóa tại Hà Nội?",
+            timestamp: new Date(),
+          }]);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading chat history:", error);
+      // Nếu lỗi, hiển thị welcome message
+      setMessages([{
+        id: "welcome",
+        role: "assistant",
+        content: language === "EN"
+          ? "Hello! 👋 How can I help you with cultural tours in Hanoi?"
+          : "Xin chào! 👋 Tôi có thể giúp gì cho bạn về các tour du lịch văn hóa tại Hà Nội?",
+        timestamp: new Date(),
+      }]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [language, getAccessToken]);
 
   // Auto scroll khi có tin nhắn mới
   useEffect(() => {
@@ -64,6 +109,36 @@ const FloatingContact = () => {
     }
   }, [messages]);
 
+  // Load chat history khi mở chat widget
+  useEffect(() => {
+    if (!isChatOpen) return;
+
+    const initializeChat = async () => {
+      // Kiểm tra session_id trong localStorage (dùng chung với ChatBot chính)
+      const storedSessionId = localStorage.getItem("chat_session_id");
+      
+      if (storedSessionId) {
+        // Luôn load lại chat history khi mở widget để đảm bảo có dữ liệu mới nhất
+        setSessionId(storedSessionId);
+        await loadChatHistory(storedSessionId);
+      } else {
+        // Nếu không có session_id, hiển thị welcome message
+        // Backend sẽ tự động tạo session mới khi gửi tin nhắn đầu tiên
+        setMessages([{
+          id: "welcome",
+          role: "assistant",
+          content: language === "EN"
+            ? "Hello! 👋 How can I help you with cultural tours in Hanoi?"
+            : "Xin chào! 👋 Tôi có thể giúp gì cho bạn về các tour du lịch văn hóa tại Hà Nội?",
+          timestamp: new Date(),
+        }]);
+      }
+    };
+
+    initializeChat();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isChatOpen]); // Chỉ chạy khi isChatOpen thay đổi
+
   // Reset unread khi mở chat
   useEffect(() => {
     if (isChatOpen) setUnreadCount(0);
@@ -71,23 +146,17 @@ const FloatingContact = () => {
 
   // Cập nhật welcome message khi đổi ngôn ngữ
   useEffect(() => {
-    setMessages((prev) => {
-      if (prev.length === 1 && prev[0].id === "welcome") {
-        return [
-          {
-            id: "welcome",
-            role: "assistant",
-            content:
-              language === "EN"
-                ? "Hello! 👋 How can I help you with cultural tours in Hanoi?"
-                : "Xin chào! 👋 Tôi có thể giúp gì cho bạn về các tour du lịch văn hóa tại Hà Nội?",
-            timestamp: new Date(),
-          },
-        ];
-      }
-      return prev;
-    });
-  }, [language]);
+    if (messages.length === 1 && messages[0].id === "welcome" && !isLoadingHistory) {
+      setMessages([{
+        id: "welcome",
+        role: "assistant",
+        content: language === "EN"
+          ? "Hello! 👋 How can I help you with cultural tours in Hanoi?"
+          : "Xin chào! 👋 Tôi có thể giúp gì cho bạn về các tour du lịch văn hóa tại Hà Nội?",
+        timestamp: new Date(),
+      }]);
+    }
+  }, [language, messages.length, isLoadingHistory]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -106,13 +175,21 @@ const FloatingContact = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ message: inputValue, session_id: sessionId, language }),
       });
 
       if (!response.ok) throw new Error("Failed");
 
       const data = await response.json();
+      
+      // Cập nhật session_id từ response (backend có thể tạo mới hoặc trả về session hiện tại)
+      // Dùng chung session_id với ChatBot chính
+      if (data.session_id && data.session_id !== sessionId) {
+        setSessionId(data.session_id);
+        localStorage.setItem("chat_session_id", data.session_id);
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -253,8 +330,17 @@ const FloatingContact = () => {
 
           {/* ===== MESSAGES AREA ===== */}
           <ScrollArea ref={scrollAreaRef} className="flex-1 bg-gray-50 p-4">
-            <div className="space-y-3">
-              {messages.map((message) => (
+            {isLoadingHistory ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex gap-2.5 ${message.role === "user" ? "justify-end" : "justify-start"}`}
@@ -297,34 +383,35 @@ const FloatingContact = () => {
                 </div>
               )}
 
-              {/* Suggestions */}
-              {messages.length === 1 && (
-                <div className="space-y-2 mt-4">
-                  <div className="flex items-center gap-1.5">
-                    <Lightbulb className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="text-xs text-gray-400 font-medium">
-                      {language === "EN" ? "Quick suggestions" : "Gợi ý nhanh"}
-                    </span>
+                {/* Suggestions */}
+                {messages.length === 1 && messages[0].id === "welcome" && (
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center gap-1.5">
+                      <Lightbulb className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-xs text-gray-400 font-medium">
+                        {language === "EN" ? "Quick suggestions" : "Gợi ý nhanh"}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {suggestedQuestions.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(item.text)}
+                          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
+                            index === 0
+                              ? "bg-white border-[1.5px] border-orange-500 text-gray-700"
+                              : "bg-white border border-gray-200 text-gray-700 hover:border-orange-300"
+                          }`}
+                        >
+                          <item.icon className={`w-3.5 h-3.5 ${index === 0 ? "text-orange-500" : "text-gray-400"}`} />
+                          {item.text}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {suggestedQuestions.map((item, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSuggestionClick(item.text)}
-                        className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
-                          index === 0
-                            ? "bg-white border-[1.5px] border-orange-500 text-gray-700"
-                            : "bg-white border border-gray-200 text-gray-700 hover:border-orange-300"
-                        }`}
-                      >
-                        <item.icon className={`w-3.5 h-3.5 ${index === 0 ? "text-orange-500" : "text-gray-400"}`} />
-                        {item.text}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </ScrollArea>
 
           {/* ===== INPUT SECTION ===== */}

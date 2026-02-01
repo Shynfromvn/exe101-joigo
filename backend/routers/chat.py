@@ -342,7 +342,7 @@ async def chat_with_openai(
         
         NHIỆM VỤ CỦA BẠN:
         Trả lời câu hỏi của khách hàng dựa trên CHÍNH XÁC thông tin dữ liệu tour và hướng dẫn đặt tour dưới đây.
-        Hãy dựa vào ngôn ngữ mà khách hàng hỏi, nếu ngôn ngữ là tiếng Việt thì phải chuyển giá từ dolar sang giá VNĐ tương ứng với tỷ giá là 1USD=26000VNĐ.
+        Hãy dựa vào ngôn ngữ mà khách hàng hỏi, nếu ngôn ngữ là tiếng Việt phải trả lời theo giá VNĐ, còn nếu tiếng Anh thì trả lời theo giá USD.
         Khi trả lời về giá nhớ thêm đơn vị USD hoặc VNĐ vào cuối giá tùy thuộc vào ngôn ngữ của người hỏi
         
         DỮ LIỆU TOUR (Nguồn sự thật):
@@ -360,7 +360,7 @@ async def chat_with_openai(
         2. Sử dụng thông tin trong phần "HƯỚNG DẪN ĐẶT TOUR" để trả lời các câu hỏi về cách đặt tour, quy trình đặt tour, phương thức đặt tour, thông tin liên hệ, v.v.
         3. Giọng điệu: Thân thiện, nhiệt tình, chuyên nghiệp.
         4. Định dạng: Trả lời ngắn gọn, rõ ràng. KHÔNG dùng markdown (không bôi đậm, không in nghiêng).
-        5. Nếu khách hỏi giá, hãy trả lời chính xác con số trong dữ liệu. Hãy dựa vào ngôn ngữ mà khách hàng hỏi, nếu ngôn ngữ là tiếng Việt thì phải chuyển giá từ dolar sang giá VNĐ tương ứng với tỷ giá là 1USD=26000VNĐ.
+        5. Nếu khách hỏi giá, hãy trả lời chính xác con số trong dữ liệu. Hãy dựa vào ngôn ngữ mà khách hàng hỏi, nếu ngôn ngữ là tiếng Việt thì trả lời theo giá VNĐ, còn nếu tiếng Anh thì trả lời theo giá USD.
         6. Khi trả lời về giá nhớ thêm đơn vị USD hoặc VNĐ vào cuối giá tùy thuộc vào ngôn ngữ của người hỏi
         """
     else: # Prompt cho Tiếng Anh
@@ -369,7 +369,7 @@ async def chat_with_openai(
         
         YOUR MISSION:
         Answer customer questions based STRICTLY on the tour data and booking guide provided below.
-        If a customer asks about the price, provide the exact figure from the data. Respond in the same language as the customer's inquiry. If the inquiry is in Vietnamese, convert the price from USD to VNĐ using the exchange rate of 1 USD = 26,000 VNĐ.
+        If a customer asks about the price, provide the exact figure from the data. Respond in the same language as the customer's inquiry. If the inquiry is in Vietnamese, respond the price in VNĐ, and if the inquiry is in English, respond the price in USD.
         When providing the price, always include the currency unit (USD or VNĐ) at the end, depending on the language used by the inquirer.
         
         TOUR DATA (Source of Truth):
@@ -387,7 +387,7 @@ async def chat_with_openai(
         2. Use information from the "HOW TO BOOK GUIDE" section to answer questions about booking process, booking methods, contact information, etc.
         3. Tone: Friendly, enthusiastic, professional.
         4. Format: Plain text only. NO markdown (no bold, no italics).
-        5. Keep prices exactly as listed. If the inquiry is in Vietnamese, convert the price from USD to VNĐ using the exchange rate of 1 USD = 26,000 VNĐ.
+        5. Keep prices exactly as listed. If the inquiry is in Vietnamese, respond the price in VNĐ, and if the inquiry is in English, respond the price in USD.
         6. When providing the price, always include the currency unit (USD or VNĐ) at the end, depending on the language used by the inquirer.
         """
 

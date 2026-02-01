@@ -27,6 +27,7 @@ interface Booking {
     title_en?: string;
     image: string;
     price: number;
+    price_vnd?: number;
     duration: string | null;
     location: string;
     departure?: string;
@@ -162,9 +163,9 @@ const MyBookings = () => {
   };
 
   // Format price
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number, price_vnd?: number) => {
     return currency === "VND" 
-      ? `${(price * 26000).toLocaleString()}₫` 
+      ? `${(price_vnd || price * 26000).toLocaleString()}₫` 
       : `$${price}`;
   };
 
@@ -393,7 +394,7 @@ const MyBookings = () => {
                             </div>
                           )}
                           <div className="flex items-center gap-2 text-sm font-semibold">
-                            <span className="text-primary">{formatPrice(booking.tours.price)}</span>
+                            <span className="text-primary">{formatPrice(booking.tours.price, booking.tours.price_vnd)}</span>
                           </div>
                         </div>
                       )}
