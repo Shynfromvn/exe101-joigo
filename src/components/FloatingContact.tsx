@@ -41,8 +41,8 @@ const FloatingContact = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Zalo & Messenger config
-  const zaloPhone = "0987654321";
-  const facebookPageId = "joigotravel";
+  const zaloPhone = "0984698782";
+  const facebookPageId = "61586357533830";
 
   const getOrCreateSessionId = (): string => {
     const stored = localStorage.getItem("floating_chat_session_id");

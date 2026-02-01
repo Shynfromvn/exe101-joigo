@@ -7,6 +7,7 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTours } from "@/contexts/TourContext";
 import { t } from "@/lib/i18n";
 
@@ -39,12 +40,12 @@ const Footer = () => {
               {t(language, "ft_about_joigo")}
             </h3>
             <div className="space-y-3">
-              <a
-                href="#"
+              <Link
+                to="/about"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_about_us")}
-              </a>
+              </Link>
               <a
                 href="#"
                 className="block text-muted-foreground hover:text-primary transition-colors"
@@ -52,7 +53,7 @@ const Footer = () => {
                 {t(language, "ft_sustainable_tourism")}
               </a>
               <a
-                href="#"
+                href="/#special-offers"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_voucher_joigo")}
@@ -63,12 +64,12 @@ const Footer = () => {
               >
                 {t(language, "ft_help_center")}
               </a>
-              <a
-                href="#"
+              <Link
+                to="/how-to-book"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
                 {t(language, "ft_how_to_book")}
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -112,24 +113,24 @@ const Footer = () => {
           </div>
 
           {/* Contact Information */}
-          <div>
+          <div className="min-w-0">
             <h3 className="font-semibold text-lg mb-4">
               {t(language, "ft_contact_us")}
             </h3>
             <div className="space-y-3">
               <a
-                href="mailto:info@joigo.com"
-                className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                href={`mailto:joigochamsockhachhang@gmail.com?subject=${encodeURIComponent("Liên hệ từ website Joigo")}&body=${encodeURIComponent("Xin chào,\n\n")}`}
+                className="flex items-start gap-3 text-muted-foreground hover:text-primary transition-colors"
               >
-                <Mail className="w-5 h-5 text-primary" />
-                <span>info@joigo.com</span>
+                <Mail className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <span className="break-words text-sm">joigochamsockhachhang@gmail.com</span>
               </a>
               <a
-                href="tel:+84971769862"
+                href="tel:+0984698782"
                 className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
               >
                 <Phone className="w-5 h-5 text-primary" />
-                <span>+84 971 769 862</span>
+                <span>+84 984 698 782</span>
               </a>
               <div className="flex items-start gap-3 text-muted-foreground">
                 <MapPin className="w-5 h-5 text-primary mt-1" />
@@ -142,7 +143,7 @@ const Footer = () => {
           </div>
 
           {/* Map Placeholder */}
-          <div>
+          <div className="min-w-0">
             <h3 className="font-semibold text-lg mb-4">
               {t(language, "ft_find_us")}
             </h3>
@@ -187,7 +188,7 @@ const Footer = () => {
               </span>
               <div className="flex gap-3">
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/profile.php?id=61586357533830"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-[#1877F2] rounded-lg flex items-center justify-center hover:bg-[#166FE5] hover:scale-110 transition-all shadow-sm"
