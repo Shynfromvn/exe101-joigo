@@ -39,7 +39,7 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
   
   const [formData, setFormData] = useState({
     title: tour?.title || "",
-    title_key: tour?.title_key || "",
+    title_en: tour?.title_en || "",
     image: tour?.image || "",
     images: tour?.images || [],
     price: tour?.price || 0,
@@ -52,6 +52,7 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
     description: tour?.description || "",
     additional_info: tour?.additional_info || "",
     description_en: tour?.description_en || "",
+    additional_info_en: tour?.additional_info_en || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,12 +147,12 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
             </div>
 
             <div className="col-span-2">
-              <Label htmlFor="title_key">Khóa tiêu đề (title_key)</Label>
+              <Label htmlFor="title_en">Tiêu đề (Tiếng Anh)</Label>
               <Input
-                id="title_key"
-                value={formData.title_key}
-                onChange={(e) => setFormData({ ...formData, title_key: e.target.value })}
-                placeholder="key-for-translation"
+                id="title_en"
+                value={formData.title_en}
+                onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
+                placeholder="Enter tour title in English..."
               />
             </div>
 
@@ -274,13 +275,24 @@ const AdminTourManager = ({ tour, onClose, onSuccess, mode }: AdminTourManagerPr
           </div>
 
           <div>
-            <Label htmlFor="additional_info">Thông tin bổ sung</Label>
+            <Label htmlFor="additional_info">Thông tin bổ sung (Tiếng Việt)</Label>
             <Textarea
               id="additional_info"
               value={formData.additional_info}
               onChange={(e) => setFormData({ ...formData, additional_info: e.target.value })}
               rows={3}
               placeholder="Các thông tin bổ sung về tour (lịch trình, quy định, ghi chú...)"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="additional_info_en">Thông tin bổ sung (Tiếng Anh)</Label>
+            <Textarea
+              id="additional_info_en"
+              value={formData.additional_info_en}
+              onChange={(e) => setFormData({ ...formData, additional_info_en: e.target.value })}
+              rows={3}
+              placeholder="Additional information about the tour (itinerary, regulations, notes...)"
             />
           </div>
 

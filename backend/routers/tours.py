@@ -8,7 +8,7 @@ router = APIRouter(prefix="/api/tours", tags=["Tours"])
 
 class TourBase(BaseModel):
     title: str
-    title_key: Optional[str] = None
+    title_en: Optional[str] = None
     image: Optional[str] = None
     images: Optional[List[str]] = []    # Mapping cột text[] trong DB
     price: Optional[float] = 0
@@ -25,6 +25,7 @@ class TourBase(BaseModel):
     description: Optional[str] = None
     additional_info: Optional[str] = None
     description_en: Optional[str] = None
+    additional_info_en: Optional[str] = None
 
 class TourCreate(TourBase):
     # ID là text, optional vì nếu user không gửi thì backend sẽ tự tạo

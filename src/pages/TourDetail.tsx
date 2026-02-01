@@ -219,12 +219,11 @@ const TourDetail = () => {
 
   const formattedPrice =
     currency === "VND"
-      ? `${(tour.price * 23000).toLocaleString()}₫`
+      ? `${(tour.price * 26000).toLocaleString()}₫`
       : `$${tour.price}`;
 
-  const displayTitle = tour.title_key
-    ? t(language, tour.title_key as any)
-    : tour.title;
+  // Chọn title_en khi language là EN, ngược lại dùng title (VI)
+  const displayTitle = language === "EN" && tour.title_en ? tour.title_en : tour.title;
 
   return (
     <div className="min-h-screen bg-background">
@@ -365,12 +364,18 @@ const TourDetail = () => {
                 {t(language, "td_about_tour")}
               </h2>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {tour.description || "Thông tin tour sẽ được cập nhật sớm."}
+                {language === "EN" 
+                  ? (tour.description_en || tour.description || "Tour information will be updated soon.")
+                  : (tour.description || "Thông tin tour sẽ được cập nhật sớm.")
+                }
               </p>
             </Card>
 
             {/* Additional Info - Thông tin bổ sung */}
-            {tour.additional_info && (
+            {(language === "EN" 
+              ? (tour.additional_info_en || tour.additional_info)
+              : tour.additional_info
+            ) && (
               <Card className="p-6 mb-6">
                 <h2 className="text-2xl font-bold mb-6">
                   {t(language, "td_tour_details")}
@@ -385,7 +390,9 @@ const TourDetail = () => {
                     [&_hr]:my-6 [&_hr]:border-border
                     [&_b]:font-semibold [&_b]:text-foreground"
                   dangerouslySetInnerHTML={{ 
-                    __html: tour.additional_info
+                    __html: language === "EN" 
+                      ? (tour.additional_info_en || tour.additional_info || "")
+                      : (tour.additional_info || "")
                   }}
                 />
               </Card>

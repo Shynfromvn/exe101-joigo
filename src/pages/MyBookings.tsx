@@ -24,6 +24,7 @@ interface Booking {
   booking_date: string;
   tours: {
     title: string;
+    title_en?: string;
     image: string;
     price: number;
     duration: string | null;
@@ -163,7 +164,7 @@ const MyBookings = () => {
   // Format price
   const formatPrice = (price: number) => {
     return currency === "VND" 
-      ? `${(price * 23000).toLocaleString()}₫` 
+      ? `${(price * 26000).toLocaleString()}₫` 
       : `$${price}`;
   };
 
@@ -345,7 +346,7 @@ const MyBookings = () => {
                       <Link to={`/tours/${booking.tour_id}`}>
                         <img
                           src={booking.tours.image}
-                          alt={booking.tours.title}
+                          alt={language === "EN" && booking.tours.title_en ? booking.tours.title_en : booking.tours.title}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
                       </Link>
@@ -362,7 +363,7 @@ const MyBookings = () => {
                               to={`/tours/${booking.tour_id}`}
                               className="text-xl font-bold hover:text-primary transition-colors"
                             >
-                              {booking.tours.title}
+                              {language === "EN" && booking.tours.title_en ? booking.tours.title_en : booking.tours.title}
                             </Link>
                           ) : (
                             <span className="text-xl font-bold text-muted-foreground">

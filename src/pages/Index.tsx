@@ -261,17 +261,131 @@ const Index = () => {
                     onClick={() => navigate(`/tours?offer=${offer.id}`)}
                   >
                     <div
-                      className={`relative h-64 rounded-xl overflow-hidden bg-gradient-to-br ${offer.gradient} shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105`}
+                      className={`relative h-64 rounded-xl overflow-visible bg-gradient-to-br ${offer.gradient} shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105`}
+                      style={{
+                        border: '6px solid #DC2626',
+                        boxShadow: '0 0 0 2px #FCD34D, 0 0 0 4px #DC2626',
+                      }}
                     >
-                      {/* Decorative Pattern */}
-                      <div className="absolute inset-0 opacity-10">
-                        <div
-                          className="absolute inset-0"
-                          style={{
-                            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M20 20c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10-10-4.5-10-10zm-20 0c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10-10-4.5-10-10z'/%3E%3C/g%3E%3C/svg%3E")`,
-                          }}
-                        />
+                      {/* Tet Border Decoration - Hoa mai và hoa đào ở các góc */}
+                      <div className="absolute inset-0 pointer-events-none overflow-visible">
+                        {/* Hoa mai (Top Left) - Yellow */}
+                        <div className="absolute -top-4 -left-4 w-20 h-20 opacity-80 group-hover:opacity-100 transition-opacity z-10">
+                          <svg viewBox="0 0 80 80" className="w-full h-full drop-shadow-lg">
+                            {/* Branch */}
+                            <path d="M 10 50 Q 25 35, 40 40 Q 55 45, 65 50" stroke="#8B4513" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                            {/* Flowers */}
+                            <g>
+                              <circle cx="25" cy="40" r="8" fill="#FCD34D"/>
+                              <circle cx="25" cy="40" r="4" fill="#FBBF24"/>
+                              <path d="M 25 32 L 23 28 L 25 26 L 27 28 Z" fill="#FCD34D"/>
+                              <path d="M 25 48 L 23 52 L 25 54 L 27 52 Z" fill="#FCD34D"/>
+                              <path d="M 17 40 L 13 40 L 15 38 L 15 42 Z" fill="#FCD34D"/>
+                              <path d="M 33 40 L 37 40 L 35 38 L 35 42 Z" fill="#FCD34D"/>
+                            </g>
+                            <g>
+                              <circle cx="45" cy="45" r="7" fill="#FCD34D"/>
+                              <circle cx="45" cy="45" r="3.5" fill="#FBBF24"/>
+                            </g>
+                            {/* Leaves */}
+                            <ellipse cx="20" cy="35" rx="3" ry="6" fill="#22C55E" transform="rotate(-25 20 35)"/>
+                            <ellipse cx="30" cy="38" rx="3" ry="6" fill="#22C55E" transform="rotate(20 30 38)"/>
+                          </svg>
+                        </div>
+                        
+                        {/* Hoa đào (Top Right) - Pink */}
+                        <div className="absolute -top-4 -right-4 w-20 h-20 opacity-80 group-hover:opacity-100 transition-opacity z-10">
+                          <svg viewBox="0 0 80 80" className="w-full h-full drop-shadow-lg">
+                            {/* Branch */}
+                            <path d="M 70 50 Q 55 35, 40 40 Q 25 45, 15 50" stroke="#8B4513" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                            {/* Flowers */}
+                            <g>
+                              <circle cx="55" cy="40" r="8" fill="#F9A8D4"/>
+                              <circle cx="55" cy="40" r="4" fill="#EC4899"/>
+                              <path d="M 55 32 L 53 28 L 55 26 L 57 28 Z" fill="#F9A8D4"/>
+                              <path d="M 55 48 L 53 52 L 55 54 L 57 52 Z" fill="#F9A8D4"/>
+                              <path d="M 47 40 L 43 40 L 45 38 L 45 42 Z" fill="#F9A8D4"/>
+                              <path d="M 63 40 L 67 40 L 65 38 L 65 42 Z" fill="#F9A8D4"/>
+                            </g>
+                            <g>
+                              <circle cx="35" cy="45" r="7" fill="#F9A8D4"/>
+                              <circle cx="35" cy="45" r="3.5" fill="#EC4899"/>
+                            </g>
+                            {/* Leaves */}
+                            <ellipse cx="60" cy="35" rx="3" ry="6" fill="#22C55E" transform="rotate(25 60 35)"/>
+                            <ellipse cx="50" cy="38" rx="3" ry="6" fill="#22C55E" transform="rotate(-20 50 38)"/>
+                          </svg>
+                        </div>
+                        
+                        {/* Hoa mai (Bottom Right) - Yellow */}
+                        <div className="absolute -bottom-4 -right-4 w-20 h-20 opacity-80 group-hover:opacity-100 transition-opacity z-10">
+                          <svg viewBox="0 0 80 80" className="w-full h-full drop-shadow-lg">
+                            {/* Branch */}
+                            <path d="M 70 30 Q 55 45, 40 40 Q 25 35, 15 30" stroke="#8B4513" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                            {/* Flowers */}
+                            <g>
+                              <circle cx="55" cy="40" r="8" fill="#FCD34D"/>
+                              <circle cx="55" cy="40" r="4" fill="#FBBF24"/>
+                            </g>
+                            <g>
+                              <circle cx="35" cy="35" r="7" fill="#FCD34D"/>
+                              <circle cx="35" cy="35" r="3.5" fill="#FBBF24"/>
+                            </g>
+                            {/* Leaves */}
+                            <ellipse cx="60" cy="45" rx="3" ry="6" fill="#22C55E" transform="rotate(25 60 45)"/>
+                          </svg>
+                        </div>
+                        
+                        {/* Hoa đào (Bottom Left) - Pink */}
+                        <div className="absolute -bottom-4 -left-4 w-20 h-20 opacity-80 group-hover:opacity-100 transition-opacity z-10">
+                          <svg viewBox="0 0 80 80" className="w-full h-full drop-shadow-lg">
+                            {/* Branch */}
+                            <path d="M 10 30 Q 25 45, 40 40 Q 55 35, 65 30" stroke="#8B4513" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                            {/* Flowers */}
+                            <g>
+                              <circle cx="25" cy="40" r="8" fill="#F9A8D4"/>
+                              <circle cx="25" cy="40" r="4" fill="#EC4899"/>
+                            </g>
+                            <g>
+                              <circle cx="45" cy="35" r="7" fill="#F9A8D4"/>
+                              <circle cx="45" cy="35" r="3.5" fill="#EC4899"/>
+                            </g>
+                            {/* Leaves */}
+                            <ellipse cx="20" cy="45" rx="3" ry="6" fill="#22C55E" transform="rotate(-25 20 45)"/>
+                          </svg>
+                        </div>
+                        
+                        {/* Đèn lồng đỏ (Top Right) */}
+                        <div className="absolute top-1 right-1 w-10 h-14 opacity-85 group-hover:opacity-100 transition-opacity z-10">
+                          <svg viewBox="0 0 40 56" className="w-full h-full drop-shadow-lg">
+                            <ellipse cx="20" cy="28" rx="12" ry="20" fill="#DC2626" stroke="#B91C1C" strokeWidth="2"/>
+                            <ellipse cx="20" cy="28" rx="7" ry="12" fill="#EF4444" opacity="0.6"/>
+                            <rect x="6" y="6" width="28" height="4" fill="#991B1B" rx="2"/>
+                            <rect x="6" y="46" width="28" height="4" fill="#991B1B" rx="2"/>
+                            <line x1="20" y1="50" x2="20" y2="56" stroke="#FCD34D" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="20" cy="56" r="2" fill="#FCD34D"/>
+                            {/* Decorative lines */}
+                            <line x1="20" y1="10" x2="20" y2="44" stroke="#FCD34D" strokeWidth="1" opacity="0.3"/>
+                          </svg>
+                        </div>
+                        
+                        {/* Đèn lồng đỏ (Bottom Left) */}
+                        <div className="absolute bottom-1 left-1 w-10 h-14 opacity-85 group-hover:opacity-100 transition-opacity z-10">
+                          <svg viewBox="0 0 40 56" className="w-full h-full drop-shadow-lg">
+                            <ellipse cx="20" cy="28" rx="12" ry="20" fill="#DC2626" stroke="#B91C1C" strokeWidth="2"/>
+                            <ellipse cx="20" cy="28" rx="7" ry="12" fill="#EF4444" opacity="0.6"/>
+                            <rect x="6" y="6" width="28" height="4" fill="#991B1B" rx="2"/>
+                            <rect x="6" y="46" width="28" height="4" fill="#991B1B" rx="2"/>
+                            <line x1="20" y1="50" x2="20" y2="56" stroke="#FCD34D" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="20" cy="56" r="2" fill="#FCD34D"/>
+                            {/* Decorative lines */}
+                            <line x1="20" y1="10" x2="20" y2="44" stroke="#FCD34D" strokeWidth="1" opacity="0.3"/>
+                          </svg>
+                        </div>
                       </div>
+                      
+                      {/* Gradient overlay để text dễ đọc */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/30 to-transparent rounded-xl" />
 
                       {/* Icon */}
                       <div className="absolute top-4 right-4">

@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 export interface Tour {
   id: string;
   title: string;
-  title_key?: string;
+  title_en?: string;
   image?: string;
   images?: string[];
   rating: number;
@@ -18,6 +18,7 @@ export interface Tour {
   additional_info?: string;
   created_at?: string;
   description_en?: string;
+  additional_info_en?: string;
 }
 
 interface TourContextType {
@@ -72,12 +73,11 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
       const data = await response.json();
 
       // --- 4. Quan trọng: Chuyển đổi dữ liệu ---
-      // Backend (Python) trả về: title_key, additional_info...
-      // Frontend (React) cần: titleKey, additionalInfo...
+      // Backend (Python) trả về: title_en, additional_info...
+      // Frontend (React) cần: title_en, additionalInfo...
       const formattedTours: Tour[] = data.map((item: any) => ({
         ...item,
-        // Map các trường bị lệch tên
-        titleKey: item.title_key,
+        // Map các trường bị lệch tên (nếu có)
         detailedDescription: item.detailed_description,
         additionalInfo: item.additional_info,
         // Đảm bảo type luôn là mảng (nếu backend trả về null thì gán mảng rỗng)
@@ -102,8 +102,10 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
     const matchesSearch =
       searchQuery === "" ||
       tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tour.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tour.destination.toLowerCase().includes(searchQuery.toLowerCase());
+      (tour.title_en && tour.title_en.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (tour.description && tour.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (tour.description_en && tour.description_en.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (tour.destination && tour.destination.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesType =
       filters.tourType === "all" ||
