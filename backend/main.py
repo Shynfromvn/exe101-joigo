@@ -34,6 +34,5 @@ app.include_router(admin.router)  # Admin dashboard
 app.include_router(tracking.router)  # Tracking
 
 @app.get("/")
-@app.head("/")
 def read_root():
     return {"message": "Hello! Backend Tour Guide (Modular Version) đang chạy ngon lành."}
