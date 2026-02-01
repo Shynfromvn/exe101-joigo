@@ -1,8 +1,9 @@
-cloudinary
-python-dotenv
-fastapi
-uvicorn
-supabase
-pydantic
-google-genai
-email-validator
+cloudinary==1.44.1
+python-dotenv==1.2.1
+fastapi==0.128.0
+uvicorn==0.40.0
+supabase==2.27.1
+pydantic==2.12.5
+google-genai==1.57.0
+openai==2.16.0
+email-validator==2.3.0

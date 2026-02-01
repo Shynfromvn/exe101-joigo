@@ -47,7 +47,11 @@ const Index = () => {
   useVisitorTracking();
   const navigate = useNavigate();
 
-  const featuredTours = tours.slice(0, 3);
+  // Featured tours: Chùa Thanh Âm (ID: 9), Làng Hương Quảng Phú Cầu (ID: 8), Thạch Thất (ID: 7)
+  const featuredTourIds = ["9", "8", "7"];
+  const featuredTours = featuredTourIds
+    .map((id) => tours.find((tour) => tour.id === id))
+    .filter((tour) => tour !== undefined);
 
   const popularSearches = [
     "Tour chill cuối tuần",
@@ -64,18 +68,21 @@ const Index = () => {
       name: "Lang Non Chuong, Vietnam",
       nameKey: "idx_landmark_lang_non_chuong" as const,
       destination: "vietnam",
+      tourId: "4", // Tour ID for "Trải nghiệm làng nón Chuông"
     },
     {
       image: thunglungbanxoi,
       name: "Thung Lũng Bản Xôi, Vietnam",
       nameKey: "idx_landmark_thung_lung_ban_xoi" as const,
       destination: "vietnam",
+      tourId: "5", // Tour ID for "Trải nghiệm Thung lung Bản xôi"
     },
     {
       image: tourThachThat,
       name: "Tour Thạch Thất, Vietnam",
       nameKey: "idx_landmark_tour_thach_that" as const,
       destination: "vietnam",
+      tourId: "7", // Tour ID for "Hơi thở Xứ Đoài"
     },
   ];
 

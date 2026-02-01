@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   Star,
@@ -47,6 +47,12 @@ import { useTourViewTracking } from "@/hooks/use-tracking";
 
 const TourDetail = () => {
   const { id } = useParams();
+  
+  // Scroll to top when component mounts or tour ID changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [id]);
+  
   // Track tour view
   useTourViewTracking(id);
   const navigate = useNavigate();
