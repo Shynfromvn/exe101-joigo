@@ -22,6 +22,8 @@ import Wishlist from "./pages/Wishlist";
 import MyBookings from "./pages/MyBookings";
 import AdminDashboard from "./pages/AdminDashboard";
 import Chat from "./pages/Chat";
+import AboutUs from "./pages/AboutUs";
+import HowToBook from "./pages/HowToBook";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,8 @@ const App = () => (
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/my-bookings" element={<MyBookings />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/how-to-book" element={<HowToBook />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

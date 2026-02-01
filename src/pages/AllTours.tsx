@@ -1,6 +1,6 @@
 import { ChevronRight, Plus } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TourCard from "@/components/TourCard";
@@ -62,6 +62,11 @@ const AllTours = () => {
     if (!offerId || !offerInfo[offerId]) return filteredTours;
     return filteredTours.filter(offerInfo[offerId].filterFn);
   }, [offerId, filteredTours]);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters({

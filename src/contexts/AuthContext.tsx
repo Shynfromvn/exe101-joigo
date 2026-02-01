@@ -80,6 +80,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Lắng nghe thay đổi auth state
   useEffect(() => {
+    // Xử lý OAuth callback từ URL hash (khi redirect từ Google OAuth)
+    const handleAuthCallback = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const error = hashParams.get('error');
+      
+      if (error) {
+        console.error('OAuth error:', error);
+        // Xóa hash từ URL để tránh lỗi khi reload
+        window.history.replaceState(null, '', window.location.pathname);
+        return;
+      }
+      
+      if (accessToken) {
+        // Xóa hash từ URL sau khi xử lý
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+
+    handleAuthCallback();
+
     // Lấy session hiện tại
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -139,10 +160,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Đăng nhập bằng Google
   const signInWithGoogle = async () => {
+    // Sử dụng window.location.origin để đảm bảo redirect về đúng domain
+    // Nếu đang ở localhost, sẽ redirect về localhost
+    // Nếu đang ở Vercel, sẽ redirect về domain Vercel
+    const redirectUrl = `${window.location.origin}${window.location.pathname}`;
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: redirectUrl,
       },
     });
 
