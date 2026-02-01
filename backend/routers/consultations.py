@@ -20,9 +20,10 @@ class ConsultationCreate(BaseModel):
 async def create_consultation(form_data: ConsultationCreate):
     """
     Nhận dữ liệu từ Form 'Book Your Tour Now' và lưu vào Supabase
+    Nếu có tour_id và user_id, sẽ lưu vào cả bảng consultations và bookings
     """
     try:
-        # Chuẩn bị payload để insert
+        # Chuẩn bị payload để insert vào consultations
         insert_data = {
             "full_name": form_data.full_name,
             "email": form_data.email,
@@ -33,16 +34,38 @@ async def create_consultation(form_data: ConsultationCreate):
             "tour_id": form_data.tour_id if form_data.tour_id else None
         }
 
-        # Gọi Supabase với admin client (bypass RLS)
-        response = supabase_admin.table("consultations").insert(insert_data).execute()
+        # Lưu vào bảng consultations
+        consultation_response = supabase_admin.table("consultations").insert(insert_data).execute()
 
-        # Kiểm tra nếu có lỗi trả về từ Supabase (dù hiếm khi dùng supabase-py)
-        if not response.data:
-            raise HTTPException(status_code=400, detail="Không thể lưu dữ liệu")
+        # Kiểm tra nếu có lỗi trả về từ Supabase
+        if not consultation_response.data:
+            raise HTTPException(status_code=400, detail="Không thể lưu dữ liệu consultation")
+
+        # Nếu có tour_id và user_id, cũng lưu vào bảng bookings
+        booking_data = None
+        if form_data.tour_id and form_data.user_id:
+            try:
+                booking_insert_data = {
+                    "user_id": form_data.user_id,
+                    "tour_id": form_data.tour_id,
+                    "full_name": form_data.full_name,
+                    "email": form_data.email,
+                    "phone": form_data.phone,
+                    "message": form_data.message,
+                    "status": "pending"
+                }
+                booking_response = supabase_admin.table("bookings").insert(booking_insert_data).execute()
+                if booking_response.data:
+                    booking_data = booking_response.data[0]
+                    print(f"✅ Đã lưu booking vào bảng bookings: {booking_data.get('id')}")
+            except Exception as booking_error:
+                # Log lỗi nhưng không fail toàn bộ request nếu consultation đã thành công
+                print(f"⚠️ Warning: Không thể lưu booking nhưng consultation đã thành công: {str(booking_error)}")
 
         return {
             "message": "Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ sớm.",
-            "data": response.data[0]
+            "data": consultation_response.data[0],
+            "booking": booking_data  # Trả về booking data nếu có
         }
 
     except Exception as e:

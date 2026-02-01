@@ -29,7 +29,8 @@ services:
       - .env
     environment:
       # Cái này quan trọng: Chỉ cho Frontend biết Backend đang ở đâu
-      # Khi chạy Docker Compose, hostname chính là tên service ("api")
-      - VITE_API_URL=http://192.168.110.211:8000
+      # Khi chạy Docker Compose, frontend trong browser cần gọi backend qua localhost
+      # vì browser chạy trên host machine, không phải trong container
+      - VITE_API_URL=http://localhost:8000
     depends_on:
       - api # Frontend chỉ chạy sau khi Backend đã khởi động

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, Menu, X, Heart, User, LogOut, Bot } from "lucide-react";
+import { Search, Menu, X, Heart, User, LogOut, Bot, CalendarCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTours } from "@/contexts/TourContext";
@@ -163,6 +163,12 @@ const Navbar = () => {
                       <Link to="/wishlist" className="flex items-center cursor-pointer">
                         <Heart className="mr-2 h-4 w-4" />
                         <span>{language === "VI" ? "Yêu thích" : "Wishlist"}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-bookings" className="flex items-center cursor-pointer">
+                        <CalendarCheck className="mr-2 h-4 w-4" />
+                        <span>{language === "VI" ? "Đơn đặt tour" : "My Bookings"}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
