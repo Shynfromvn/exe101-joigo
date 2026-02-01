@@ -8,7 +8,7 @@ interface TourCardProps {
   id: string;
   image: string;
   title: string;
-  titleKey?: string;
+  title_en?: string;
   rating: number;
   reviews: number;
   price: number;
@@ -18,7 +18,7 @@ const TourCard = ({
   id,
   image,
   title,
-  titleKey,
+  title_en,
   rating,
   reviews,
   price,
@@ -26,9 +26,10 @@ const TourCard = ({
   const { currency, language } = useTours();
   const navigate = useNavigate();
   const formattedPrice =
-    currency === "VND" ? `${(price * 23000).toLocaleString()}₫` : `$${price}`;
+    currency === "VND" ? `${(price * 26000).toLocaleString()}₫` : `$${price}`;
 
-  const displayTitle = titleKey ? t(language, titleKey as any) : title;
+  // Chọn title_en khi language là EN, ngược lại dùng title (VI)
+  const displayTitle = language === "EN" && title_en ? title_en : title;
 
   const handleClick = () => {
     navigate(`/tours/${id}`);

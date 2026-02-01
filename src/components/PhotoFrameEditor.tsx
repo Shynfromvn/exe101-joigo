@@ -24,7 +24,10 @@ interface FrameConfig {
   | "photo_frame_frame_bold"
   | "photo_frame_frame_ornamental"
   | "photo_frame_demo"
-  | "photo_frame_frame_floral";
+  | "photo_frame_frame_floral"
+  | "photo_frame_happy_new_year_1"
+  | "photo_frame_banh_keo_1"
+  | "photo_frame_happy_new_year_2";
   borderWidth: number;
   borderColor: string;
   borderRadius: number;
@@ -127,6 +130,39 @@ const frameConfigs: FrameConfig[] = [
     shadow: false,
     style: "svg",
     svgPath: "/frames/demo.svg",
+  },
+  {
+    id: "happy_new_year_1",
+    nameKey: "photo_frame_happy_new_year_1",
+    borderWidth: 0,
+    borderColor: "transparent",
+    borderRadius: 0,
+    padding: 50,
+    shadow: false,
+    style: "svg",
+    svgPath: "/frames/happy_new_year_1.svg",
+  },
+  {
+    id: "banh_keo_1",
+    nameKey: "photo_frame_banh_keo_1",
+    borderWidth: 0,
+    borderColor: "transparent",
+    borderRadius: 0,
+    padding: 50,
+    shadow: false,
+    style: "svg",
+    svgPath: "/frames/banh_keo_1.svg",
+  },
+  {
+    id: "happy_new_year_2",
+    nameKey: "photo_frame_happy_new_year_2",
+    borderWidth: 0,
+    borderColor: "transparent",
+    borderRadius: 0,
+    padding: 50,
+    shadow: false,
+    style: "svg",
+    svgPath: "/frames/happy_new_year_2.svg",
   }
 ];
 

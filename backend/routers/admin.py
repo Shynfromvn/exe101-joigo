@@ -242,7 +242,7 @@ async def get_all_bookings(
     try:
         # Lấy bookings với tours (không JOIN profiles vì không có FK trực tiếp)
         query = supabase_admin.table("bookings")\
-            .select("*, tours(title, image, price, departure, destination)")
+            .select("*, tours(title, title_en, image, price, departure, destination)")
         
         if status_filter:
             query = query.eq("status", status_filter)
@@ -364,7 +364,7 @@ async def get_tour_views(
     verify_admin(authorization)
     
     try:
-        query = supabase_admin.table("tour_views").select("*, tours(title, image)")
+        query = supabase_admin.table("tour_views").select("*, tours(title, title_en, image)")
         
         if tour_id:
             query = query.eq("tour_id", tour_id)

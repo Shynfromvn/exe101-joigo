@@ -45,7 +45,6 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
       // Format dữ liệu
       const formattedTours: Tour[] = (result.favorites || []).map((item: any) => ({
         ...item,
-        titleKey: item.title_key,
         detailedDescription: item.detailed_description,
         additionalInfo: item.additional_info,
         type: item.type || [],

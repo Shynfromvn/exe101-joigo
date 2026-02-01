@@ -51,7 +51,7 @@ async def get_my_bookings(user_id: str = Query(..., description="ID của user m
             # Dùng admin client để bypass RLS và có thể đọc dữ liệu của user
             # Lưu ý: Bảng tours có departure và destination, không có duration và location
             response = supabase_admin.table("bookings")\
-                .select("*, tours(title, image, price, departure, destination)")\
+                .select("*, tours(title, title_en, image, price, departure, destination)")\
                 .eq("user_id", user_id)\
                 .order("booking_date", desc=True)\
                 .execute()
@@ -106,7 +106,7 @@ async def get_my_bookings(user_id: str = Query(..., description="ID của user m
                     if tour_id:
                         try:
                             tour_response = supabase_admin.table("tours")\
-                                .select("title, image, price, departure, destination")\
+                                .select("title, title_en, image, price, departure, destination")\
                                 .eq("id", tour_id)\
                                 .single()\
                                 .execute()

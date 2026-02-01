@@ -119,15 +119,21 @@ const AllTours = () => {
         {offerId && offerInfo[offerId] && (
           <div className="mb-6 p-6 bg-gradient-to-r from-orange-500/10 to-orange-600/10 border-2 border-orange-500/30 rounded-lg">
             <h2 className="text-2xl font-bold mb-2 text-orange-600">
-              {offerInfo[offerId].title}
+              {offerId === "early-bird" && t(language, "idx_offer_early_bird")}
+              {offerId === "weekend-getaway" && t(language, "idx_offer_weekend")}
+              {offerId === "cultural-heritage" && t(language, "idx_offer_cultural")}
             </h2>
             <p className="text-muted-foreground mb-2">
-              {offerInfo[offerId].description}
+              {offerId === "early-bird" && t(language, "idx_offer_early_bird_desc")}
+              {offerId === "weekend-getaway" && t(language, "idx_offer_weekend_desc")}
+              {offerId === "cultural-heritage" && t(language, "idx_offer_cultural_desc")}
             </p>
             <p className="text-sm text-muted-foreground">
               {offerTours.length}{" "}
-              {offerTours.length === 1 ? "tour available" : "tours available"}{" "}
-              with this offer
+              {offerTours.length === 1 
+                ? t(language, "idx_tour_available")
+                : t(language, "idx_tours_available")}{" "}
+              {t(language, "idx_with_this_offer")}
             </p>
           </div>
         )}

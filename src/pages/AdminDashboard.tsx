@@ -45,6 +45,7 @@ interface DashboardStats {
     top_tours: Array<{
       tour_id: string;
       title: string;
+      title_en?: string;
       image: string;
       views: number;
     }>;
@@ -74,6 +75,7 @@ interface Booking {
   booking_date: string;
   tours: {
     title: string;
+    title_en?: string;
     image: string;
     price: number;
     location: string;
@@ -441,10 +443,10 @@ const AdminDashboard = () => {
                   <div key={tour.tour_id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       {tour.image && (
-                        <img src={tour.image} alt={tour.title} className="w-16 h-16 object-cover rounded" />
+                        <img src={tour.image} alt={language === "EN" && tour.title_en ? tour.title_en : tour.title} className="w-16 h-16 object-cover rounded" />
                       )}
                       <div>
-                        <p className="font-medium">{tour.title}</p>
+                        <p className="font-medium">{language === "EN" && tour.title_en ? tour.title_en : tour.title}</p>
                         <p className="text-sm text-muted-foreground">
                           {tour.views} {language === "VI" ? "lượt xem" : "views"}
                         </p>
@@ -575,9 +577,9 @@ const AdminDashboard = () => {
                             {booking.tours ? (
                               <div className="flex items-center gap-2">
                                 {booking.tours.image && (
-                                  <img src={booking.tours.image} alt={booking.tours.title} className="w-10 h-10 object-cover rounded" />
+                                  <img src={booking.tours.image} alt={language === "EN" && booking.tours.title_en ? booking.tours.title_en : booking.tours.title} className="w-10 h-10 object-cover rounded" />
                                 )}
-                                <span className="font-medium">{booking.tours.title}</span>
+                                <span className="font-medium">{language === "EN" && booking.tours.title_en ? booking.tours.title_en : booking.tours.title}</span>
                               </div>
                             ) : (
                               <span className="text-muted-foreground">N/A</span>
