@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import tours, favourites, chat, profile, consultations, bookings
+from routers import tours, favourites, chat, profile, consultations, bookings, admin, tracking
 
 # Khởi tạo ứng dụng
 app = FastAPI()
@@ -29,6 +29,8 @@ app.include_router(chat.router)  # Chatbot với semantic search
 app.include_router(profile.router)  # Profile management
 app.include_router(consultations.router)
 app.include_router(bookings.router)
+app.include_router(admin.router)  # Admin dashboard
+app.include_router(tracking.router)  # Tracking
 
 @app.get("/")
 def read_root():

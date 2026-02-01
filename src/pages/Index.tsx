@@ -21,6 +21,7 @@ import ContactForm from "@/components/ContactForm";
 import PhotoFrameBanner from "@/components/PhotoFrameBanner";
 import ScrollAnimation from "@/components/ScrollAnimation";
 import FloatingContact from "@/components/FloatingContact";
+import { useVisitorTracking } from "@/hooks/use-tracking";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -42,6 +43,8 @@ const Index = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const { tours, setSearchQuery, language } = useTours();
+  // Track visitor
+  useVisitorTracking();
   const navigate = useNavigate();
 
   const featuredTours = tours.slice(0, 3);

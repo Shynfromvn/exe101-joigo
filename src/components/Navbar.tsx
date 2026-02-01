@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, Menu, X, Heart, User, LogOut, Bot, CalendarCheck } from "lucide-react";
+import { Search, Menu, X, Heart, User, LogOut, Bot, CalendarCheck, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTours } from "@/contexts/TourContext";
@@ -171,6 +171,14 @@ const Navbar = () => {
                         <span>{language === "VI" ? "Đơn đặt tour" : "My Bookings"}</span>
                       </Link>
                     </DropdownMenuItem>
+                    {user.role === 'admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/dashboard" className="flex items-center cursor-pointer">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          <span>{language === "VI" ? "Dashboard" : "Dashboard"}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={async () => {

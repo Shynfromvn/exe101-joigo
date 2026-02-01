@@ -43,9 +43,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { QRCodeSVG } from "qrcode.react";
+import { useTourViewTracking } from "@/hooks/use-tracking";
 
 const TourDetail = () => {
   const { id } = useParams();
+  // Track tour view
+  useTourViewTracking(id);
   const navigate = useNavigate();
   const { tours, currency, language, fetchTours } = useTours();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
