@@ -9,7 +9,7 @@ import { t } from "@/lib/i18n";
 import { QRCodeSVG } from "qrcode.react";
 import vanMieu from "@/assets/van-mieu.jpg";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 const ContactForm = () => {
   const { language } = useTours();
