@@ -1,6 +1,6 @@
 import os
 import uuid
-from openai import OpenAI
+from google import genai
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
@@ -8,12 +8,12 @@ from pathlib import Path
 import json
 
 # --- Cấu hình ---
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY)
-router = APIRouter(prefix="/api/chat-openai", tags=["Chatbot OpenAI"])
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+client = genai.Client(api_key=GOOGLE_API_KEY)
+router = APIRouter(prefix="/api/chat", tags=["Chatbot"])
 
-# Tên model (gpt-5-nano)
-MODEL_NAME = "gpt-5-nano"
+# Tên model chuẩn (Sử dụng Flash 1.5 cho nhanh và rẻ, context lớn)
+MODEL_NAME = "gemini-2.5-flash"
 
 # --- Biến toàn cục chứa dữ liệu Tour ---
 TOUR_CONTEXT = ""
@@ -85,14 +85,15 @@ def remove_markdown(text: str) -> str:
     return text.strip()
 
 @router.post("")
-async def chat_with_openai(request: ChatRequest):
+async def chat_with_gemini(request: ChatRequest):
     user_query = request.message
     session_id = request.session_id or str(uuid.uuid4())
     language = request.language or "VI"
 
     # 1. Lấy lịch sử chat
     history = get_chat_history(session_id)
-    
+    history_text = "\n".join(history)
+
     # 2. Tạo Prompt (Kết hợp: Chỉ thị + Dữ liệu file text + Lịch sử chat + Câu hỏi mới)
     
     # Prompt cho Tiếng Việt
@@ -138,34 +139,30 @@ async def chat_with_openai(request: ChatRequest):
         5. When providing the price, always include the currency unit (USD or VNĐ) at the end, depending on the language used by the inquirer.
         """
 
-    # 3. Xây dựng danh sách messages cho OpenAI API
-    messages = [
-        {"role": "system", "content": system_instruction}
-    ]
-    
-    # Thêm lịch sử hội thoại
-    for msg in history:
-        if msg.startswith("User: "):
-            messages.append({"role": "user", "content": msg[6:]})  # Bỏ "User: " prefix
-        elif msg.startswith("AI: "):
-            messages.append({"role": "assistant", "content": msg[4:]})  # Bỏ "AI: " prefix
-    
-    # Thêm câu hỏi mới của user
-    messages.append({"role": "user", "content": user_query})
+    # Nội dung gửi đi
+    final_prompt = f"""
+    {system_instruction}
+
+    LỊCH SỬ HỘI THOẠI TRƯỚC ĐÓ:
+    {history_text}
+
+    KHÁCH HÀNG VỪA HỎI:
+    "{user_query}"
+
+    TRẢ LỜI CỦA BẠN:
+    """
 
     try:
-        # 4. Gọi OpenAI API
-        response = client.chat.completions.create(
+        # 3. Gọi Gemini (Chỉ tốn 1 request duy nhất)
+        response = client.models.generate_content(
             model=MODEL_NAME,
-            messages=messages,
-            temperature=0.7,
-            max_tokens=1000
+            contents=final_prompt
         )
         
-        ai_reply = response.choices[0].message.content
+        ai_reply = response.text
         ai_reply = remove_markdown(ai_reply)
 
-        # 5. Lưu lịch sử
+        # 4. Lưu lịch sử
         save_chat_history(session_id, "User", user_query)
         save_chat_history(session_id, "AI", ai_reply)
 
