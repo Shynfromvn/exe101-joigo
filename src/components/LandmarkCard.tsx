@@ -8,6 +8,7 @@ interface LandmarkCardProps {
   name: string;
   nameKey?: string;
   destination: string;
+  tourId?: string; // Optional tour ID to navigate to specific tour detail
 }
 
 const LandmarkCard = ({
@@ -15,19 +16,23 @@ const LandmarkCard = ({
   name,
   nameKey,
   destination,
+  tourId,
 }: LandmarkCardProps) => {
   const navigate = useNavigate();
-  const { setFilters, setSearchQuery, language } = useTours();
+  const { language } = useTours();
 
   const handleClick = () => {
-    setSearchQuery("");
-    setFilters({
-      tourType: "all",
-      departure: "all",
-      destination: destination,
-      transportation: "all",
-    });
-    navigate("/tours");
+    if (tourId) {
+      // Navigate to specific tour detail page
+      navigate(`/tours/${tourId}`);
+      // Scroll to top after navigation
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
+    } else {
+      // Fallback: navigate to tours page with destination filter
+      navigate("/tours");
+    }
   };
 
   return (
